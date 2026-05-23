@@ -22,7 +22,7 @@ import { EmptyStateComponent } from '../../shared/components/empty-state/empty-s
 export class AdminComponent implements OnInit {
   private readonly portalService = inject(PortalService);
 
-  activeTab = signal<'employees' | 'users' | 'departments'>('employees');
+  activeTab = signal<'employees' | 'users' | 'departments' | 'leaves'>('employees');
 
   employees = signal<any[]>([]);
   users = signal<any[]>([]);
@@ -37,6 +37,27 @@ export class AdminComponent implements OnInit {
   // Department Form State
   newDeptName = signal<string>('');
   newDeptCode = signal<string>('');
+
+  // Leave Registry State
+  leaveTypes = signal<any[]>([]);
+  
+  // Register Leave Type Form State
+  newLeaveCode = signal<string>('');
+  newLeaveName = signal<string>('');
+  newLeaveLimit = signal<number>(12);
+  newLeaveCarryForward = signal<number>(0);
+
+  // Edit Leave Type Form State
+  selectedLeaveType = signal<any | null>(null);
+  editLeaveCode = signal<string>('');
+  editLeaveName = signal<string>('');
+  editLeaveLimit = signal<number>(12);
+  editLeaveCarryForward = signal<number>(0);
+
+  // Custom Balance Allocator Form State
+  allocSelectedEmpId = signal<number | null>(null);
+  allocSelectedLeaveTypeId = signal<number | null>(null);
+  allocCustomCount = signal<number>(0);
 
   // Pagination
   currentPage = signal<number>(0);
@@ -58,6 +79,7 @@ export class AdminComponent implements OnInit {
     this.loadUsers();
     this.loadAllEmployees();
     this.loadDepartments();
+    this.loadLeaveTypes();
   }
 
   loadEmployees(): void {
@@ -182,6 +204,103 @@ export class AdminComponent implements OnInit {
       error: (err) => {
         console.error('Failed to create department', err);
         alert(err?.error?.message || 'Error occurred while registering department.');
+      }
+    });
+  }
+
+  loadLeaveTypes(): void {
+    this.portalService.getLeaveTypes().subscribe({
+      next: (res) => this.leaveTypes.set(res || []),
+      error: (err) => console.error('Failed to load leave types', err)
+    });
+  }
+
+  addLeaveType(): void {
+    const code = this.newLeaveCode().trim();
+    const name = this.newLeaveName().trim();
+    const annualLimit = Number(this.newLeaveLimit());
+    const carryForwardLimit = Number(this.newLeaveCarryForward());
+
+    if (!code || !name) {
+      alert('Please fill in all leave type fields.');
+      return;
+    }
+
+    this.portalService.createLeaveType({ name, code, annualLimit, carryForwardLimit }).subscribe({
+      next: () => {
+        alert('Leave Type registered successfully.');
+        this.newLeaveCode.set('');
+        this.newLeaveName.set('');
+        this.newLeaveLimit.set(12);
+        this.newLeaveCarryForward.set(0);
+        this.loadLeaveTypes();
+      },
+      error: (err) => {
+        console.error('Failed to register leave type', err);
+        alert(err?.error?.message || 'Error occurred while registering leave type.');
+      }
+    });
+  }
+
+  startEditLeaveType(leaveType: any): void {
+    this.selectedLeaveType.set(leaveType);
+    this.editLeaveCode.set(leaveType.code);
+    this.editLeaveName.set(leaveType.name);
+    this.editLeaveLimit.set(leaveType.annualLimit);
+    this.editLeaveCarryForward.set(leaveType.carryForwardLimit || 0);
+  }
+
+  cancelEditLeaveType(): void {
+    this.selectedLeaveType.set(null);
+  }
+
+  saveLeaveType(): void {
+    const lt = this.selectedLeaveType();
+    if (!lt) return;
+
+    const code = this.editLeaveCode().trim();
+    const name = this.editLeaveName().trim();
+    const annualLimit = Number(this.editLeaveLimit());
+    const carryForwardLimit = Number(this.editLeaveCarryForward());
+
+    if (!code || !name) {
+      alert('Please fill in all fields.');
+      return;
+    }
+
+    this.portalService.updateLeaveType(lt.id, { name, code, annualLimit, carryForwardLimit }).subscribe({
+      next: () => {
+        alert('Leave Type updated successfully.');
+        this.cancelEditLeaveType();
+        this.loadLeaveTypes();
+      },
+      error: (err) => {
+        console.error('Failed to update leave type', err);
+        alert(err?.error?.message || 'Error occurred while updating leave type.');
+      }
+    });
+  }
+
+  allocateLeaveCount(): void {
+    const employeeId = this.allocSelectedEmpId() ? Number(this.allocSelectedEmpId()) : null;
+    const leaveTypeId = this.allocSelectedLeaveTypeId() ? Number(this.allocSelectedLeaveTypeId()) : null;
+    const allocated = Number(this.allocCustomCount());
+
+    if (!employeeId || !leaveTypeId) {
+      alert('Please select an employee and a leave type.');
+      return;
+    }
+
+    this.portalService.allocateLeaveBalance({ employeeId, leaveTypeId, allocated }).subscribe({
+      next: () => {
+        alert('Leave balance custom allocation updated successfully.');
+        this.allocSelectedEmpId.set(null);
+        this.allocSelectedLeaveTypeId.set(null);
+        this.allocCustomCount.set(0);
+      },
+      error: (err) => {
+        console.error('Failed to allocate custom leave balance', err);
+        alert(err?.error?.message || 'Error occurred while custom-allocating leave balance.');
       }
     });
   }

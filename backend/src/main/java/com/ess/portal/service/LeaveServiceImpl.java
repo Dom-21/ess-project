@@ -26,6 +26,7 @@ public class LeaveServiceImpl implements LeaveService {
     private final EmployeeRepository employeeRepository;
     private final WorkflowEngineService workflowEngineService;
     private final NotificationService notificationService;
+    private final LeaveTypeRepository leaveTypeRepository;
 
     @Override
     @Transactional
@@ -208,5 +209,129 @@ public class LeaveServiceImpl implements LeaveService {
                 .page(page.getNumber()).size(page.getSize())
                 .totalElements(page.getTotalElements()).totalPages(page.getTotalPages())
                 .first(page.isFirst()).last(page.isLast()).build();
+    }
+
+    @Override
+    public List<LeaveType> getAllLeaveTypes() {
+        return leaveTypeRepository.findAll();
+    }
+
+    @Override
+    @Transactional
+    public LeaveType createLeaveType(LeaveType leaveType) {
+        if (leaveType.getName() == null || leaveType.getName().trim().isEmpty()) {
+            throw new BadRequestException("Leave Type name is required");
+        }
+        if (leaveType.getCode() == null || leaveType.getCode().trim().isEmpty()) {
+            throw new BadRequestException("Leave Type code is required");
+        }
+        if (leaveType.getAnnualLimit() == null || leaveType.getAnnualLimit() < 0) {
+            throw new BadRequestException("Valid annual limit is required");
+        }
+
+        String code = leaveType.getCode().trim().toUpperCase();
+        String name = leaveType.getName().trim();
+
+        if (leaveTypeRepository.existsByCode(code)) {
+            throw new BadRequestException("Leave Type with this code already exists");
+        }
+        if (leaveTypeRepository.existsByName(name)) {
+            throw new BadRequestException("Leave Type with this name already exists");
+        }
+
+        leaveType.setCode(code);
+        leaveType.setName(name);
+        leaveType.setIsDeleted(false);
+        leaveType.setCreatedBy("HR_ADMIN");
+
+        LeaveType saved = leaveTypeRepository.save(leaveType);
+
+        // Auto-seed balances for all existing employees
+        List<Employee> allEmployees = employeeRepository.findAll();
+        for (Employee emp : allEmployees) {
+            if (!leaveBalanceRepository.findByEmployeeAndLeaveType(emp, saved).isPresent()) {
+                LeaveBalance balance = new LeaveBalance();
+                balance.setEmployee(emp);
+                balance.setLeaveType(saved);
+                balance.setAllocated(saved.getAnnualLimit());
+                balance.setUsed(0);
+                balance.setPendingApproval(0);
+                balance.setIsDeleted(false);
+                balance.setCreatedBy("HR_ADMIN");
+                leaveBalanceRepository.save(balance);
+            }
+        }
+
+        return saved;
+    }
+
+    @Override
+    @Transactional
+    public LeaveType updateLeaveType(Integer id, LeaveType leaveTypeDetails) {
+        LeaveType existing = leaveTypeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Leave Type not found with ID: " + id));
+
+        if (leaveTypeDetails.getName() == null || leaveTypeDetails.getName().trim().isEmpty()) {
+            throw new BadRequestException("Leave Type name is required");
+        }
+        if (leaveTypeDetails.getCode() == null || leaveTypeDetails.getCode().trim().isEmpty()) {
+            throw new BadRequestException("Leave Type code is required");
+        }
+        if (leaveTypeDetails.getAnnualLimit() == null || leaveTypeDetails.getAnnualLimit() < 0) {
+            throw new BadRequestException("Valid annual limit is required");
+        }
+
+        String code = leaveTypeDetails.getCode().trim().toUpperCase();
+        String name = leaveTypeDetails.getName().trim();
+
+        if (!existing.getCode().equalsIgnoreCase(code) && leaveTypeRepository.existsByCode(code)) {
+            throw new BadRequestException("Leave Type with this code already exists");
+        }
+        if (!existing.getName().equalsIgnoreCase(name) && leaveTypeRepository.existsByName(name)) {
+            throw new BadRequestException("Leave Type with this name already exists");
+        }
+
+        existing.setName(name);
+        existing.setCode(code);
+        existing.setAnnualLimit(leaveTypeDetails.getAnnualLimit());
+        existing.setCarryForwardLimit(leaveTypeDetails.getCarryForwardLimit() != null ? leaveTypeDetails.getCarryForwardLimit() : 0);
+        existing.setUpdatedBy("HR_ADMIN");
+
+        return leaveTypeRepository.save(existing);
+    }
+
+    @Override
+    @Transactional
+    public void allocateLeaveBalance(LeaveAllocationDto allocation) {
+        if (allocation.getEmployeeId() == null) {
+            throw new BadRequestException("Employee ID is required");
+        }
+        if (allocation.getLeaveTypeId() == null) {
+            throw new BadRequestException("Leave Type ID is required");
+        }
+        if (allocation.getAllocated() == null || allocation.getAllocated() < 0) {
+            throw new BadRequestException("Valid allocation days count is required");
+        }
+
+        Employee employee = employeeRepository.findById(allocation.getEmployeeId())
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found with ID: " + allocation.getEmployeeId()));
+
+        LeaveType leaveType = leaveTypeRepository.findById(allocation.getLeaveTypeId())
+                .orElseThrow(() -> new ResourceNotFoundException("Leave Type not found with ID: " + allocation.getLeaveTypeId()));
+
+        LeaveBalance balance = leaveBalanceRepository.findByEmployeeAndLeaveType(employee, leaveType)
+                .orElseGet(() -> {
+                    LeaveBalance b = new LeaveBalance();
+                    b.setEmployee(employee);
+                    b.setLeaveType(leaveType);
+                    b.setUsed(0);
+                    b.setPendingApproval(0);
+                    b.setIsDeleted(false);
+                    b.setCreatedBy("HR_ADMIN");
+                    return b;
+                });
+
+        balance.setAllocated(allocation.getAllocated());
+        leaveBalanceRepository.save(balance);
     }
 }

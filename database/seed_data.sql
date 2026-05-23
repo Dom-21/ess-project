@@ -419,26 +419,145 @@ INSERT INTO assets (serial_number, name, category, status, assigned_to, assignme
 -- 11. SEED WORKFLOW TRANSACTION TEST DATA
 -- ====================================================
 
--- Leave request by Rohan (Maker: 15) -> Manager: Amit (14)
+-- Leave request by Rohan (Maker: 15) -> Manager: Devendra (10)
 -- Date range: 2026-06-01 to 2026-06-03 (3 days)
-INSERT INTO leave_requests (employee_id, leave_type_id, start_date, end_date, total_days, reason, status) VALUES
-(15, 1, '2026-06-01', '2026-06-03', 3.00, 'Family emergency at hometown', 'PENDING');
+INSERT INTO leave_requests (id, employee_id, leave_type_id, start_date, end_date, total_days, reason, status) VALUES
+(1, 15, 1, '2026-06-01', '2026-06-03', 3.00, 'Family emergency at hometown', 'PENDING');
 
 -- Create corresponding workflow instance
-INSERT INTO workflow_instances (workflow_config_id, entity_id, status, current_step) VALUES
-(1, 1, 'PENDING', 1); -- Entity ID is 1 (the leave request)
+INSERT INTO workflow_instances (id, workflow_config_id, entity_id, status, current_step) VALUES
+(1, 1, 1, 'PENDING', 1);
 
 -- Assign Task to Devendra Singh (Manager: employee_id 10)
-INSERT INTO workflow_tasks (workflow_instance_id, step_number, assigned_approver_id, assigned_role, status) VALUES
-(1, 1, 10, 'REPORTING_MANAGER', 'PENDING');
+INSERT INTO workflow_tasks (id, workflow_instance_id, step_number, assigned_approver_id, assigned_role, status) VALUES
+(1, 1, 1, 10, 'REPORTING_MANAGER', 'PENDING');
 
 -- Create corresponding submission log
-INSERT INTO workflow_action_logs (workflow_instance_id, step_number, action, actor_id, remarks) VALUES
-(1, 1, 'SUBMIT', 15, 'Request submitted and routed to level 1.');
+INSERT INTO workflow_action_logs (id, workflow_instance_id, step_number, action, actor_id, remarks) VALUES
+(1, 1, 1, 'SUBMIT', 15, 'Request submitted and routed to level 1.');
+
+
+-- ----------------------------------------------------
+-- ADDITIONAL DASHBOARD DEMO TRANSACTIONS
+-- ----------------------------------------------------
+
+-- 1. Historical Approved Leave for Sneha Bansal (EMP012) -> Manager: Shalini Sharma (7)
+INSERT INTO leave_requests (id, employee_id, leave_type_id, start_date, end_date, total_days, reason, status) VALUES
+(2, 12, 1, '2026-05-10', '2026-05-12', 3.00, 'Annual family relocation check', 'APPROVED');
+
+INSERT INTO workflow_instances (id, workflow_config_id, entity_id, status, current_step) VALUES
+(2, 1, 2, 'APPROVED', 1);
+
+INSERT INTO workflow_tasks (id, workflow_instance_id, step_number, assigned_approver_id, assigned_role, status) VALUES
+(2, 2, 1, 7, 'REPORTING_MANAGER', 'COMPLETED');
+
+INSERT INTO workflow_action_logs (id, workflow_instance_id, step_number, action, actor_id, remarks) VALUES
+(2, 2, 1, 'SUBMIT', 12, 'Relocation request.'),
+(3, 2, 1, 'APPROVE', 7, 'Approved relocation leaves.');
+
+UPDATE leave_balances SET used = 3 WHERE employee_id = 12 AND leave_type_id = 1;
+
+
+-- 2. Pending Travel Request for Aditi Sen (EMP016) -> Manager: Devendra Singh (10)
+INSERT INTO travel_requests (id, employee_id, purpose, origin, destination, start_date, end_date, estimated_cost, advance_amount, status) VALUES
+(1, 16, 'Client Onboarding Workshop and Technical Setup', 'Bangalore', 'Mumbai', '2026-06-15', '2026-06-18', 15000.00, 2000.00, 'PENDING');
+
+INSERT INTO workflow_instances (id, workflow_config_id, entity_id, status, current_step) VALUES
+(3, 2, 1, 'PENDING', 1);
+
+INSERT INTO workflow_tasks (id, workflow_instance_id, step_number, assigned_approver_id, assigned_role, status) VALUES
+(3, 3, 1, 10, 'REPORTING_MANAGER', 'PENDING');
+
+INSERT INTO workflow_action_logs (id, workflow_instance_id, step_number, action, actor_id, remarks) VALUES
+(4, 3, 1, 'SUBMIT', 16, 'Applying for Mumbai onsite trip for client workshop.');
+
+
+-- 3. Approved Travel Request for Rohit Trivedi (EMP013) -> Manager: Anil Gupta (8)
+INSERT INTO travel_requests (id, employee_id, purpose, origin, destination, start_date, end_date, estimated_cost, advance_amount, status) VALUES
+(2, 13, 'Annual Corporate Retreat coordination & Hotel setup', 'Mumbai', 'Goa', '2026-05-20', '2026-05-23', 25000.00, 0.00, 'APPROVED');
+
+INSERT INTO workflow_instances (id, workflow_config_id, entity_id, status, current_step) VALUES
+(4, 2, 2, 'APPROVED', 2);
+
+INSERT INTO workflow_tasks (id, workflow_instance_id, step_number, assigned_approver_id, assigned_role, status) VALUES
+(4, 4, 1, 8, 'REPORTING_MANAGER', 'COMPLETED'),
+(5, 4, 2, NULL, 'TRAVEL_APPROVER', 'COMPLETED');
+
+INSERT INTO workflow_action_logs (id, workflow_instance_id, step_number, action, actor_id, remarks) VALUES
+(5, 4, 1, 'SUBMIT', 13, 'Retreat pre-visit setup.'),
+(6, 4, 1, 'APPROVE', 8, 'Manager approved.'),
+(7, 4, 2, 'APPROVE', 1, 'Travel Desk approved.');
+
+
+-- 4. Pending Expense Claim for Kavita Deshmukh (EMP018) -> Manager: Devendra Singh (10)
+INSERT INTO expense_claims (id, employee_id, title, claim_date, total_amount, status, remarks) VALUES
+(1, 18, 'Stationery and Client Dinner Reimbursement', '2026-05-22', 5600.00, 'PENDING', 'Claims for JW Marriott dinner and office printing supplies.');
+
+INSERT INTO expense_items (id, expense_claim_id, expense_category_id, item_date, amount, description) VALUES
+(1, 1, 3, '2026-05-21', 4200.00, 'Client Lunch dinner with VP of Engineering from client team'),
+(2, 1, 4, '2026-05-22', 1400.00, 'Special cartridge printing papers and folders');
+
+INSERT INTO workflow_instances (id, workflow_config_id, entity_id, status, current_step) VALUES
+(5, 3, 1, 'PENDING', 1);
+
+INSERT INTO workflow_tasks (id, workflow_instance_id, step_number, assigned_approver_id, assigned_role, status) VALUES
+(6, 5, 1, 10, 'REPORTING_MANAGER', 'PENDING');
+
+INSERT INTO workflow_action_logs (id, workflow_instance_id, step_number, action, actor_id, remarks) VALUES
+(8, 5, 1, 'SUBMIT', 18, 'Expense details submitted.');
+
+
+-- 5. Approved Expense Claim for Sneha Bansal (EMP012) -> Manager: Shalini Sharma (7)
+INSERT INTO expense_claims (id, employee_id, title, claim_date, total_amount, status, remarks) VALUES
+(2, 12, 'WFH Setup Ergonomic Chair Claim', '2026-05-15', 8500.00, 'APPROVED', 'Ergonomic office mesh chair for remote working.');
+
+INSERT INTO expense_items (id, expense_claim_id, expense_category_id, item_date, amount, description) VALUES
+(3, 2, 4, '2026-05-14', 8500.00, 'Featherlite Mesh Office Chair purchased online');
+
+INSERT INTO workflow_instances (id, workflow_config_id, entity_id, status, current_step) VALUES
+(6, 3, 2, 'APPROVED', 2);
+
+INSERT INTO workflow_tasks (id, workflow_instance_id, step_number, assigned_approver_id, assigned_role, status) VALUES
+(7, 6, 1, 7, 'REPORTING_MANAGER', 'COMPLETED'),
+(8, 6, 2, 8, 'FINANCE_MANAGER', 'COMPLETED');
+
+INSERT INTO workflow_action_logs (id, workflow_instance_id, step_number, action, actor_id, remarks) VALUES
+(9, 6, 1, 'SUBMIT', 12, 'WFH Setup chair allowance.'),
+(10, 6, 1, 'APPROVE', 7, 'HR manager approved WFH request.'),
+(11, 6, 2, 'APPROVE', 8, 'Finance manager payout approved.');
+
+
+-- 6. Pending Asset Request for Rohan Sharma (EMP015)
+INSERT INTO asset_requests (id, employee_id, category, reason, status) VALUES
+(1, 15, 'MONITOR', 'Requesting an external Dell 27 inch display to enhance development efficiency.', 'PENDING');
+
+INSERT INTO workflow_instances (id, workflow_config_id, entity_id, status, current_step) VALUES
+(7, 5, 1, 'PENDING', 1);
+
+INSERT INTO workflow_tasks (id, workflow_instance_id, step_number, assigned_approver_id, assigned_role, status) VALUES
+(9, 7, 1, 9, 'IT_ADMIN', 'PENDING');
+
+INSERT INTO workflow_action_logs (id, workflow_instance_id, step_number, action, actor_id, remarks) VALUES
+(12, 7, 1, 'SUBMIT', 15, 'Need second screen.');
+
+
+-- 7. Allocated Asset Request for Aditi Sen (EMP016)
+INSERT INTO asset_requests (id, employee_id, category, reason, status, asset_id) VALUES
+(2, 16, 'LAPTOP', 'Standard engineering development machine request.', 'ALLOCATED', 2);
+
+INSERT INTO workflow_instances (id, workflow_config_id, entity_id, status, current_step) VALUES
+(8, 5, 2, 'APPROVED', 1);
+
+INSERT INTO workflow_tasks (id, workflow_instance_id, step_number, assigned_approver_id, assigned_role, status) VALUES
+(10, 8, 1, 9, 'IT_ADMIN', 'COMPLETED');
+
+INSERT INTO workflow_action_logs (id, workflow_instance_id, step_number, action, actor_id, remarks) VALUES
+(13, 8, 1, 'SUBMIT', 16, 'Laptop needed.'),
+(14, 8, 1, 'APPROVE', 9, 'Assigned Lenovo ThinkPad serial SN-LAP-2024-002.');
 
 
 -- ====================================================
 -- 12. SEED SALARY STRUCTURES
 -- ====================================================
 INSERT INTO salary_structures (employee_id, basic, hra, special_allowance, provident_fund, ctc) VALUES
-(15, 30000.00, 15000.00, 20000.00, 3600.00, 850000.00); -- Rohan Sharma
+(15, 30000.00, 15000.00, 20000.00, 3600.00, 850000.00);

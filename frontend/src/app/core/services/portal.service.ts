@@ -194,4 +194,23 @@ export class PortalService {
   getAllEmployeesList(): Observable<any[]> {
     return this.http.get<any[]>('/api/employees/all');
   }
+
+  // ==========================================
+  // 12. LEAVE REGISTRY APIs (HR ADMIN)
+  // ==========================================
+  getLeaveTypes(): Observable<any[]> {
+    return this.http.get<any[]>('/api/leaves/types');
+  }
+
+  createLeaveType(data: any): Observable<any> {
+    return this.http.post<any>('/api/leaves/types', data);
+  }
+
+  updateLeaveType(id: number, data: any): Observable<any> {
+    return this.http.put<any>(`/api/leaves/types/${id}`, data);
+  }
+
+  allocateLeaveBalance(data: any): Observable<any> {
+    return this.http.post<any>('/api/leaves/balances/allocate', data);
+  }
 }

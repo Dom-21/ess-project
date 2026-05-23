@@ -58,6 +58,14 @@
     >
       Departments Setting
     </button>
+    <button 
+      (click)="activeTab.set('leaves')"
+      [class]="activeTab() === 'leaves' ? 'bg-primary-500 text-white shadow-sm font-black' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-950 font-bold'"
+      class="px-4 py-1.5 rounded-md text-xs transition-all cursor-pointer"
+      id="leave-registry-tab"
+    >
+      Leave Registry Settings
+    </button>
   </div>
 
   <!-- TAB 1: EMPLOYEES DIRECTORY -->
@@ -386,6 +394,260 @@
             Save Changes
           </button>
         </div>
+      </div>
+    </div>
+  }
+
+  <!-- TAB 4: LEAVE REGISTRY SETTINGS -->
+  @if (activeTab() === 'leaves') {
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 animate-in fade-in duration-200">
+      
+      <!-- Left Side: Leave Types Catalog -->
+      <div class="md:col-span-2 bg-white dark:bg-slate-900 rounded-lg p-4 border border-slate-200 dark:border-slate-800/80 shadow-sm space-y-3">
+        <app-page-header title="Corporate Leave Master Registry" subtitle="Configure leave limits, codes, and carry forward policies."></app-page-header>
+        
+        <div class="overflow-x-auto mt-2">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="border-b border-slate-100 dark:border-slate-800 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                <th class="pb-2 pl-2">ID</th>
+                <th class="pb-2">Code</th>
+                <th class="pb-2">Leave Type Name</th>
+                <th class="pb-2">Annual Limit</th>
+                <th class="pb-2">Carry Forward Limit</th>
+                <th class="pb-2 pr-2 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100/60 dark:divide-slate-800/60">
+              @for (lt of leaveTypes(); track lt.id) {
+                <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/30 text-xs font-semibold text-slate-700 dark:text-slate-300">
+                  <td class="py-2.5 pl-2 font-black text-slate-400">#{{ lt.id }}</td>
+                  <td class="py-2.5 font-bold">
+                    <span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-slate-100 dark:bg-slate-950 text-slate-700 dark:text-slate-300 border border-slate-200/50 dark:border-slate-800 uppercase animate-pulse">
+                      {{ lt.code }}
+                    </span>
+                  </td>
+                  <td class="py-2.5 font-bold text-slate-850 dark:text-slate-200">{{ lt.name }}</td>
+                  <td class="py-2.5 font-bold text-slate-850 dark:text-slate-200">{{ lt.annualLimit }} Days</td>
+                  <td class="py-2.5 font-medium text-slate-400">{{ lt.carryForwardLimit || 0 }} Days</td>
+                  <td class="py-2.5 pr-2 text-right">
+                    <button 
+                      (click)="startEditLeaveType(lt)"
+                      class="px-2 py-1 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-[10px] font-extrabold text-primary-500 rounded border border-slate-200 dark:border-slate-850 cursor-pointer transition-all active:scale-95"
+                    >
+                      Edit Rules
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        @if (leaveTypes().length === 0) {
+          <app-empty-state message="No leave types registered in system settings"></app-empty-state>
+        }
+      </div>
+
+      <!-- Right Side: Forms Panel -->
+      <div class="space-y-4">
+        
+        <!-- Form A: Register / Edit Leave Type -->
+        <div class="bg-white dark:bg-slate-900 rounded-lg p-4 border border-slate-200 dark:border-slate-800/80 shadow-sm space-y-4 h-fit">
+          @if (selectedLeaveType()) {
+            <div>
+              <div class="flex items-center justify-between">
+                <h3 class="font-sans font-black text-xs text-slate-850 dark:text-slate-100 uppercase tracking-wider text-primary-500">
+                  Edit Leave Type Rules
+                </h3>
+                <button 
+                  (click)="cancelEditLeaveType()" 
+                  class="text-[10px] font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                >
+                  Cancel
+                </button>
+              </div>
+              <p class="text-[10px] text-slate-400 mt-0.5 font-medium">Modifying rules for {{ selectedLeaveType().code }}</p>
+            </div>
+
+            <div class="space-y-3">
+              <div class="space-y-1">
+                <label class="text-[9px] font-extrabold uppercase tracking-wider text-slate-400">Leave Code</label>
+                <input 
+                  type="text" 
+                  [ngModel]="editLeaveCode()"
+                  (ngModelChange)="editLeaveCode.set($event)"
+                  class="w-full px-2.5 py-1.5 rounded-md bg-slate-50/50 dark:bg-slate-955 border border-slate-200 dark:border-slate-850 outline-none text-xs font-bold text-slate-700 dark:text-slate-300 focus:border-primary-500 focus:ring-1 focus:ring-primary-500/10 uppercase"
+                />
+              </div>
+
+              <div class="space-y-1">
+                <label class="text-[9px] font-extrabold uppercase tracking-wider text-slate-400">Leave Name</label>
+                <input 
+                  type="text" 
+                  [ngModel]="editLeaveName()"
+                  (ngModelChange)="editLeaveName.set($event)"
+                  class="w-full px-2.5 py-1.5 rounded-md bg-slate-50/50 dark:bg-slate-955 border border-slate-200 dark:border-slate-850 outline-none text-xs font-bold text-slate-700 dark:text-slate-300 focus:border-primary-500 focus:ring-1 focus:ring-primary-500/10"
+                />
+              </div>
+
+              <div class="grid grid-cols-2 gap-2">
+                <div class="space-y-1">
+                  <label class="text-[9px] font-extrabold uppercase tracking-wider text-slate-400">Annual Limit</label>
+                  <input 
+                    type="number" 
+                    [ngModel]="editLeaveLimit()"
+                    (ngModelChange)="editLeaveLimit.set($event)"
+                    class="w-full px-2.5 py-1.5 rounded-md bg-slate-50/50 dark:bg-slate-955 border border-slate-200 dark:border-slate-850 outline-none text-xs font-bold text-slate-700 dark:text-slate-300"
+                  />
+                </div>
+                <div class="space-y-1">
+                  <label class="text-[9px] font-extrabold uppercase tracking-wider text-slate-400">Carry Forward</label>
+                  <input 
+                    type="number" 
+                    [ngModel]="editLeaveCarryForward()"
+                    (ngModelChange)="editLeaveCarryForward.set($event)"
+                    class="w-full px-2.5 py-1.5 rounded-md bg-slate-50/50 dark:bg-slate-955 border border-slate-200 dark:border-slate-850 outline-none text-xs font-bold text-slate-700 dark:text-slate-300"
+                  />
+                </div>
+              </div>
+
+              <button 
+                (click)="saveLeaveType()"
+                class="w-full py-2 bg-primary-500 hover:bg-primary-600 text-white text-xs font-bold rounded-md shadow transition-all cursor-pointer block text-center"
+              >
+                Save Changes
+              </button>
+            </div>
+          @} @else {
+            <div>
+              <h3 class="font-sans font-black text-xs text-slate-850 dark:text-slate-100 uppercase tracking-wider">
+                Register Leave Type
+              </h3>
+              <p class="text-[10px] text-slate-400 mt-0.5 font-medium">Add a new leave type category globally.</p>
+            </div>
+
+            <div class="space-y-3">
+              <div class="space-y-1">
+                <label class="text-[9px] font-extrabold uppercase tracking-wider text-slate-400">Leave Code</label>
+                <input 
+                  type="text" 
+                  id="new-leave-code"
+                  [ngModel]="newLeaveCode()"
+                  (ngModelChange)="newLeaveCode.set($event)"
+                  placeholder="e.g. PL"
+                  class="w-full px-2.5 py-1.5 rounded-md bg-slate-50/50 dark:bg-slate-955 border border-slate-200 dark:border-slate-850 outline-none text-xs font-bold text-slate-700 dark:text-slate-300 focus:border-primary-500 focus:ring-1 focus:ring-primary-500/10 uppercase"
+                />
+              </div>
+
+              <div class="space-y-1">
+                <label class="text-[9px] font-extrabold uppercase tracking-wider text-slate-400">Leave Name</label>
+                <input 
+                  type="text" 
+                  id="new-leave-name"
+                  [ngModel]="newLeaveName()"
+                  (ngModelChange)="newLeaveName.set($event)"
+                  placeholder="e.g. Paternity Leave"
+                  class="w-full px-2.5 py-1.5 rounded-md bg-slate-50/50 dark:bg-slate-955 border border-slate-200 dark:border-slate-850 outline-none text-xs font-bold text-slate-700 dark:text-slate-300 focus:border-primary-500 focus:ring-1 focus:ring-primary-500/10"
+                />
+              </div>
+
+              <div class="grid grid-cols-2 gap-2">
+                <div class="space-y-1">
+                  <label class="text-[9px] font-extrabold uppercase tracking-wider text-slate-400">Annual Limit</label>
+                  <input 
+                    type="number" 
+                    id="new-leave-limit"
+                    [ngModel]="newLeaveLimit()"
+                    (ngModelChange)="newLeaveLimit.set($event)"
+                    class="w-full px-2.5 py-1.5 rounded-md bg-slate-50/50 dark:bg-slate-955 border border-slate-200 dark:border-slate-850 outline-none text-xs font-bold text-slate-700 dark:text-slate-300"
+                  />
+                </div>
+                <div class="space-y-1">
+                  <label class="text-[9px] font-extrabold uppercase tracking-wider text-slate-400">Carry Forward</label>
+                  <input 
+                    type="number" 
+                    id="new-leave-cf"
+                    [ngModel]="newLeaveCarryForward()"
+                    (ngModelChange)="newLeaveCarryForward.set($event)"
+                    class="w-full px-2.5 py-1.5 rounded-md bg-slate-50/50 dark:bg-slate-955 border border-slate-200 dark:border-slate-850 outline-none text-xs font-bold text-slate-700 dark:text-slate-300"
+                  />
+                </div>
+              </div>
+
+              <button 
+                (click)="addLeaveType()"
+                id="btn-register-leave"
+                class="w-full py-2 bg-gradient-to-r from-primary-500 to-accent-500 text-white text-xs font-bold rounded-md shadow hover:opacity-95 transition-all cursor-pointer block text-center"
+              >
+                Register Leave Type
+              </button>
+            </div>
+          }
+        </div>
+
+        <!-- Form B: Custom Balance Allocator -->
+        <div class="bg-white dark:bg-slate-900 rounded-lg p-4 border border-slate-200 dark:border-slate-800/80 shadow-sm space-y-4 h-fit">
+          <div>
+            <h3 class="font-sans font-black text-xs text-slate-850 dark:text-slate-100 uppercase tracking-wider">
+              Custom Balance Allocator
+            </h3>
+            <p class="text-[10px] text-slate-400 mt-0.5 font-medium">Allocate custom leave limits on a per-employee basis.</p>
+          </div>
+
+          <div class="space-y-3">
+            <div class="space-y-1">
+              <label class="text-[9px] font-extrabold uppercase tracking-wider text-slate-400">Select Employee</label>
+              <select 
+                id="alloc-employee"
+                [ngModel]="allocSelectedEmpId()"
+                (ngModelChange)="allocSelectedEmpId.set($event)"
+                class="w-full px-2.5 py-1.5 rounded-md bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-850 outline-none text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer"
+              >
+                <option [value]="null" disabled selected>Choose Employee</option>
+                @for (emp of allEmployees(); track emp.id) {
+                  <option [value]="emp.id">{{ emp.firstName }} {{ emp.lastName }} (ID: {{ emp.employeeId }})</option>
+                }
+              </select>
+            </div>
+
+            <div class="space-y-1">
+              <label class="text-[9px] font-extrabold uppercase tracking-wider text-slate-400">Select Leave Type</label>
+              <select 
+                id="alloc-leave-type"
+                [ngModel]="allocSelectedLeaveTypeId()"
+                (ngModelChange)="allocSelectedLeaveTypeId.set($event)"
+                class="w-full px-2.5 py-1.5 rounded-md bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-850 outline-none text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer"
+              >
+                <option [value]="null" disabled selected>Choose Leave Type</option>
+                @for (lt of leaveTypes(); track lt.id) {
+                  <option [value]="lt.id">{{ lt.name }} ({{ lt.code }})</option>
+                }
+              </select>
+            </div>
+
+            <div class="space-y-1">
+              <label class="text-[9px] font-extrabold uppercase tracking-wider text-slate-400">Allocated Count (Days)</label>
+              <input 
+                type="number" 
+                id="alloc-count"
+                [ngModel]="allocCustomCount()"
+                (ngModelChange)="allocCustomCount.set($event)"
+                placeholder="e.g. 15"
+                class="w-full px-2.5 py-1.5 rounded-md bg-slate-50/50 dark:bg-slate-955 border border-slate-200 dark:border-slate-850 outline-none text-xs font-bold text-slate-700 dark:text-slate-300"
+              />
+            </div>
+
+            <button 
+              (click)="allocateLeaveCount()"
+              id="btn-allocate-balance"
+              class="w-full py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-xs font-bold rounded-md shadow hover:opacity-95 transition-all cursor-pointer block text-center"
+            >
+              Allocate Custom Balance
+            </button>
+          </div>
+        </div>
+
       </div>
     </div>
   }

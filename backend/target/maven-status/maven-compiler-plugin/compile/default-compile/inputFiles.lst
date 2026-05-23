@@ -33,6 +33,7 @@ C:\Users\danda\OneDrive\Documents\AntiGravity\ess-project\backend\src\main\java\
 C:\Users\danda\OneDrive\Documents\AntiGravity\ess-project\backend\src\main\java\com\ess\portal\dto\ExpenseItemDto.java
 C:\Users\danda\OneDrive\Documents\AntiGravity\ess-project\backend\src\main\java\com\ess\portal\dto\ExpenseItemResponse.java
 C:\Users\danda\OneDrive\Documents\AntiGravity\ess-project\backend\src\main\java\com\ess\portal\dto\JwtResponse.java
+C:\Users\danda\OneDrive\Documents\AntiGravity\ess-project\backend\src\main\java\com\ess\portal\dto\LeaveAllocationDto.java
 C:\Users\danda\OneDrive\Documents\AntiGravity\ess-project\backend\src\main\java\com\ess\portal\dto\LeaveBalanceDto.java
 C:\Users\danda\OneDrive\Documents\AntiGravity\ess-project\backend\src\main\java\com\ess\portal\dto\LeaveRequestDto.java
 C:\Users\danda\OneDrive\Documents\AntiGravity\ess-project\backend\src\main\java\com\ess\portal\dto\LeaveRequestResponse.java
@@ -93,6 +94,7 @@ C:\Users\danda\OneDrive\Documents\AntiGravity\ess-project\backend\src\main\java\
 C:\Users\danda\OneDrive\Documents\AntiGravity\ess-project\backend\src\main\java\com\ess\portal\repository\FileMetadataRepository.java
 C:\Users\danda\OneDrive\Documents\AntiGravity\ess-project\backend\src\main\java\com\ess\portal\repository\LeaveBalanceRepository.java
 C:\Users\danda\OneDrive\Documents\AntiGravity\ess-project\backend\src\main\java\com\ess\portal\repository\LeaveRequestRepository.java
+C:\Users\danda\OneDrive\Documents\AntiGravity\ess-project\backend\src\main\java\com\ess\portal\repository\LeaveTypeRepository.java
 C:\Users\danda\OneDrive\Documents\AntiGravity\ess-project\backend\src\main\java\com\ess\portal\repository\NotificationRepository.java
 C:\Users\danda\OneDrive\Documents\AntiGravity\ess-project\backend\src\main\java\com\ess\portal\repository\PayslipRepository.java
 C:\Users\danda\OneDrive\Documents\AntiGravity\ess-project\backend\src\main\java\com\ess\portal\repository\ReimbursementRepository.java

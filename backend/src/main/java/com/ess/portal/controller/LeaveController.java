@@ -57,4 +57,29 @@ public class LeaveController {
     public ResponseEntity<List<LeaveBalanceDto>> getMyLeaveBalances(Principal principal) {
         return ResponseEntity.ok(leaveService.getMyLeaveBalances(principal.getName()));
     }
+
+    // Leave Registry configuration endpoints
+    @GetMapping("/types")
+    public ResponseEntity<List<com.ess.portal.entity.LeaveType>> getAllLeaveTypes() {
+        return ResponseEntity.ok(leaveService.getAllLeaveTypes());
+    }
+
+    @PostMapping("/types")
+    @PreAuthorize("hasRole('HR_ADMIN')")
+    public ResponseEntity<com.ess.portal.entity.LeaveType> createLeaveType(@RequestBody com.ess.portal.entity.LeaveType leaveType) {
+        return ResponseEntity.ok(leaveService.createLeaveType(leaveType));
+    }
+
+    @PutMapping("/types/{id}")
+    @PreAuthorize("hasRole('HR_ADMIN')")
+    public ResponseEntity<com.ess.portal.entity.LeaveType> updateLeaveType(@PathVariable Integer id, @RequestBody com.ess.portal.entity.LeaveType leaveType) {
+        return ResponseEntity.ok(leaveService.updateLeaveType(id, leaveType));
+    }
+
+    @PostMapping("/balances/allocate")
+    @PreAuthorize("hasRole('HR_ADMIN')")
+    public ResponseEntity<Void> allocateLeaveBalance(@RequestBody LeaveAllocationDto allocation) {
+        leaveService.allocateLeaveBalance(allocation);
+        return ResponseEntity.ok().build();
+    }
 }

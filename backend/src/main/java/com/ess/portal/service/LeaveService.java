@@ -13,4 +13,10 @@ public interface LeaveService {
     PagedResponse<LeaveRequestResponse> getAllLeaves(Pageable pageable);
     void cancelLeave(Integer id, String email);
     List<LeaveBalanceDto> getMyLeaveBalances(String email);
+
+    // Leave Registry Configuration
+    List<com.ess.portal.entity.LeaveType> getAllLeaveTypes();
+    com.ess.portal.entity.LeaveType createLeaveType(com.ess.portal.entity.LeaveType leaveType);
+    com.ess.portal.entity.LeaveType updateLeaveType(Integer id, com.ess.portal.entity.LeaveType leaveType);
+    void allocateLeaveBalance(LeaveAllocationDto allocation);
 }
