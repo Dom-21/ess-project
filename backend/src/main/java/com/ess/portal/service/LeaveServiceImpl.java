@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -42,7 +41,6 @@ public class LeaveServiceImpl implements LeaveService {
         long totalDays = calculateWorkingDays(request.getStartDate(), request.getEndDate());
 
         // Validate leave balance
-        System.out.print(request);
         LeaveBalance balance = leaveBalanceRepository
                 .findByEmployeeAndLeaveTypeId(employee, request.getLeaveTypeId())
                 .orElseThrow(() -> new BadRequestException("Leave balance not found for the selected leave type"));

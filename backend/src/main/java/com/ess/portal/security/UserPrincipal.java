@@ -9,7 +9,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class UserPrincipal implements UserDetails {
 
@@ -20,7 +19,7 @@ public class UserPrincipal implements UserDetails {
     private final Collection<? extends GrantedAuthority> authorities;
 
     public UserPrincipal(Integer id, String email, String password, boolean isActive,
-                         Collection<? extends GrantedAuthority> authorities) {
+            Collection<? extends GrantedAuthority> authorities) {
         this.id = id;
         this.email = email;
         this.password = password;
@@ -35,9 +34,8 @@ public class UserPrincipal implements UserDetails {
         user.getRoles().forEach(role -> {
             authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getName()));
             // Add Permissions as raw authorities
-            role.getPermissions().forEach(permission -> 
-                authorities.add(new SimpleGrantedAuthority(permission.getName()))
-            );
+            role.getPermissions()
+                    .forEach(permission -> authorities.add(new SimpleGrantedAuthority(permission.getName())));
         });
 
         return new UserPrincipal(
@@ -45,8 +43,7 @@ public class UserPrincipal implements UserDetails {
                 user.getEmail(),
                 user.getPassword(),
                 user.getIsActive(),
-                authorities
-        );
+                authorities);
     }
 
     public Integer getId() {
@@ -90,8 +87,10 @@ public class UserPrincipal implements UserDetails {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         UserPrincipal that = (UserPrincipal) o;
         return Objects.equals(id, that.id);
     }

@@ -25,7 +25,7 @@ public class DepartmentController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('HR_ADMIN')")
+    @PreAuthorize("hasAnyRole('HR_ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<Department> createDepartment(@RequestBody Department department) {
         if (department.getCode() == null || department.getCode().trim().isEmpty()) {
             throw new BadRequestException("Department code is required");

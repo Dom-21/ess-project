@@ -7,7 +7,6 @@ import com.ess.portal.exception.BadRequestException;
 import com.ess.portal.exception.ResourceNotFoundException;
 import com.ess.portal.repository.DepartmentRepository;
 import com.ess.portal.repository.EmployeeRepository;
-import com.ess.portal.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,7 +21,6 @@ import java.util.stream.Collectors;
 public class EmployeeServiceImpl implements EmployeeService {
 
     private final EmployeeRepository employeeRepository;
-    private final UserRepository userRepository;
     private final DepartmentRepository departmentRepository;
 
     @Override
@@ -52,13 +50,20 @@ public class EmployeeServiceImpl implements EmployeeService {
         Employee emp = employeeRepository.findByUserEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("Employee profile not found for: " + email));
 
-        if (request.getFirstName() != null) emp.setFirstName(request.getFirstName());
-        if (request.getLastName() != null) emp.setLastName(request.getLastName());
-        if (request.getPhoneNumber() != null) emp.setPhoneNumber(request.getPhoneNumber());
-        if (request.getDateOfBirth() != null) emp.setDateOfBirth(request.getDateOfBirth());
-        if (request.getGender() != null) emp.setGender(request.getGender());
-        if (request.getAddress() != null) emp.setAddress(request.getAddress());
-        if (request.getProfileImageUrl() != null) emp.setProfileImageUrl(request.getProfileImageUrl());
+        if (request.getFirstName() != null)
+            emp.setFirstName(request.getFirstName());
+        if (request.getLastName() != null)
+            emp.setLastName(request.getLastName());
+        if (request.getPhoneNumber() != null)
+            emp.setPhoneNumber(request.getPhoneNumber());
+        if (request.getDateOfBirth() != null)
+            emp.setDateOfBirth(request.getDateOfBirth());
+        if (request.getGender() != null)
+            emp.setGender(request.getGender());
+        if (request.getAddress() != null)
+            emp.setAddress(request.getAddress());
+        if (request.getProfileImageUrl() != null)
+            emp.setProfileImageUrl(request.getProfileImageUrl());
 
         return toDto(employeeRepository.save(emp));
     }
@@ -107,7 +112,8 @@ public class EmployeeServiceImpl implements EmployeeService {
         if (emp.getReportingManager() != null) {
             dto.setReportingManagerId(emp.getReportingManager().getId());
             dto.setReportingManagerEmployeeId(emp.getReportingManager().getEmployeeId());
-            dto.setReportingManagerName(emp.getReportingManager().getFirstName() + " " + emp.getReportingManager().getLastName());
+            dto.setReportingManagerName(
+                    emp.getReportingManager().getFirstName() + " " + emp.getReportingManager().getLastName());
         }
         dto.setStatus(emp.getUser() != null && emp.getUser().getIsActive() ? "ACTIVE" : "INACTIVE");
         return dto;
@@ -133,7 +139,8 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         if (request.getDepartmentId() != null) {
             Department dept = departmentRepository.findById(request.getDepartmentId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Department not found with id: " + request.getDepartmentId()));
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Department not found with id: " + request.getDepartmentId()));
             emp.setDepartment(dept);
         } else {
             emp.setDepartment(null);
@@ -144,7 +151,8 @@ public class EmployeeServiceImpl implements EmployeeService {
                 throw new BadRequestException("An employee cannot be their own manager");
             }
             Employee manager = employeeRepository.findById(request.getReportingManagerId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Reporting manager not found with id: " + request.getReportingManagerId()));
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Reporting manager not found with id: " + request.getReportingManagerId()));
             emp.setReportingManager(manager);
         } else {
             emp.setReportingManager(null);

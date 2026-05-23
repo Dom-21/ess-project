@@ -1,20 +1,21 @@
 package com.ess.portal.service;
 
-import com.ess.portal.constants.WorkflowStatus;
 import com.ess.portal.entity.*;
 import com.ess.portal.exception.BadRequestException;
 import com.ess.portal.exception.ResourceNotFoundException;
 import com.ess.portal.repository.*;
+
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Slf4j
 public class WorkflowEngineServiceImpl implements WorkflowEngineService {
 
     @Autowired
@@ -60,7 +61,8 @@ public class WorkflowEngineServiceImpl implements WorkflowEngineService {
     @Transactional
     public void initiate(String entityType, Integer entityId, Employee maker) {
         WorkflowConfig config = workflowConfigRepository.findByEntityType(entityType)
-                .orElseThrow(() -> new ResourceNotFoundException("Workflow configuration not found for: " + entityType));
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("Workflow configuration not found for: " + entityType));
 
         if (!config.getIsActive()) {
             throw new BadRequestException("Workflow config is inactive for: " + entityType);
@@ -108,9 +110,10 @@ public class WorkflowEngineServiceImpl implements WorkflowEngineService {
         workflowActionLogRepository.save(log);
 
         // Send Notification to Approver
-        sendNotification(approver.getUser().getEmail(), 
-                "Pending Approval: " + entityType, 
-                "A new " + entityType + " request from " + maker.getFirstName() + " " + maker.getLastName() + " is pending your approval.");
+        sendNotification(approver.getUser().getEmail(),
+                "Pending Approval: " + entityType,
+                "A new " + entityType + " request from " + maker.getFirstName() + " " + maker.getLastName()
+                        + " is pending your approval.");
     }
 
     @Override
@@ -157,9 +160,10 @@ public class WorkflowEngineServiceImpl implements WorkflowEngineService {
             updateTargetEntityStatus(entityType, instance.getEntityId(), "REJECTED");
 
             // Notify Maker
-            sendNotification(maker.getUser().getEmail(), 
-                    "Request Rejected: " + entityType, 
-                    "Your " + entityType + " request has been rejected by " + actor.getFirstName() + ". Remarks: " + remarks);
+            sendNotification(maker.getUser().getEmail(),
+                    "Request Rejected: " + entityType,
+                    "Your " + entityType + " request has been rejected by " + actor.getFirstName() + ". Remarks: "
+                            + remarks);
 
         } else if ("APPROVE".equalsIgnoreCase(action)) {
             task.setStatus("COMPLETED");
@@ -187,9 +191,10 @@ public class WorkflowEngineServiceImpl implements WorkflowEngineService {
                 workflowTaskRepository.save(nextTask);
 
                 // Notify next Approver
-                sendNotification(nextApprover.getUser().getEmail(), 
-                        "Pending Approval: " + entityType, 
-                        "A request for " + entityType + " from " + maker.getFirstName() + " has passed level " + task.getStepNumber() + " and requires your review.");
+                sendNotification(nextApprover.getUser().getEmail(),
+                        "Pending Approval: " + entityType,
+                        "A request for " + entityType + " from " + maker.getFirstName() + " has passed level "
+                                + task.getStepNumber() + " and requires your review.");
             } else {
                 // Final approval reached
                 instance.setStatus("APPROVED");
@@ -201,8 +206,8 @@ public class WorkflowEngineServiceImpl implements WorkflowEngineService {
                 executeFinalActionTriggers(entityType, instance.getEntityId());
 
                 // Notify Maker
-                sendNotification(maker.getUser().getEmail(), 
-                        "Request Approved: " + entityType, 
+                sendNotification(maker.getUser().getEmail(),
+                        "Request Approved: " + entityType,
                         "Congratulations! Your " + entityType + " request has been fully approved.");
             }
         }
@@ -218,15 +223,29 @@ public class WorkflowEngineServiceImpl implements WorkflowEngineService {
         if ("APPROVED".equalsIgnoreCase(instance.getStatus()) || "REJECTED".equalsIgnoreCase(instance.getStatus())) {
             throw new BadRequestException("Cannot cancel a completed workflow.");
         }
+        log.info("=====================Inside service method======================");
 
+        // Restore pending balance
+        if (entityType.equalsIgnoreCase("LEAVE") && !"APPROVED".equalsIgnoreCase(instance.getStatus())) {
+            LeaveRequest lr = leaveRequestRepository.findById(entityId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Leave request not found: " + entityId));
+            LeaveBalance balance = leaveBalanceRepository
+                    .findByEmployeeAndLeaveTypeId(lr.getEmployee(), lr.getLeaveType().getId())
+                    .orElse(null);
+            if (balance != null) {
+                int currentPending = balance.getPendingApproval() != null ? balance.getPendingApproval() : 0;
+                int restoredPending = Math.max(0, currentPending - lr.getTotalDays().intValue());
+                balance.setPendingApproval(restoredPending);
+                leaveBalanceRepository.save(balance);
+            }
+        }
         instance.setStatus("CANCELLED");
         workflowInstanceRepository.save(instance);
 
-        // Cancel all pending tasks
-        List<WorkflowTask> pendingTasks = workflowTaskRepository.findByAssignedApproverAndStatus(null, "PENDING"); // We will just query standard filter
         // Better: standard scan of tasks for this instance
         workflowTaskRepository.findAll().stream()
-                .filter(t -> t.getWorkflowInstance().getId().equals(instance.getId()) && "PENDING".equalsIgnoreCase(t.getStatus()))
+                .filter(t -> t.getWorkflowInstance().getId().equals(instance.getId())
+                        && "PENDING".equalsIgnoreCase(t.getStatus()))
                 .forEach(t -> {
                     t.setStatus("CANCELLED");
                     workflowTaskRepository.save(t);
@@ -248,16 +267,19 @@ public class WorkflowEngineServiceImpl implements WorkflowEngineService {
     @Transactional(readOnly = true)
     public List<WorkflowTask> getPendingInbox(Employee approver) {
         List<WorkflowTask> tasks = workflowTaskRepository.findByAssignedApproverAndStatus(approver, "PENDING");
-        
-        // Also support fetching generic role-assigned tasks matching the approver's corporate roles
+
+        // Also support fetching generic role-assigned tasks matching the approver's
+        // corporate roles
         approver.getUser().getRoles().forEach(role -> {
-            List<WorkflowTask> roleTasks = workflowTaskRepository.findByAssignedRoleAndStatus(role.getName(), "PENDING");
+            List<WorkflowTask> roleTasks = workflowTaskRepository.findByAssignedRoleAndStatus(role.getName(),
+                    "PENDING");
             roleTasks.stream()
-                .filter(t -> t.getAssignedApprover() == null) // only generic ones
-                .forEach(tasks::add);
+                    .filter(t -> t.getAssignedApprover() == null) // only generic ones
+                    .forEach(tasks::add);
         });
 
-        // Ensure Maker-Checker separation (don't display tasks where the approver is the maker of the request)
+        // Ensure Maker-Checker separation (don't display tasks where the approver is
+        // the maker of the request)
         List<WorkflowTask> filteredTasks = new ArrayList<>();
         for (WorkflowTask t : tasks) {
             Employee maker = getMaker(t.getWorkflowInstance());
@@ -301,7 +323,8 @@ public class WorkflowEngineServiceImpl implements WorkflowEngineService {
 
         // Find active pending task
         return workflowTaskRepository.findAll().stream()
-                .filter(t -> t.getWorkflowInstance().getId().equals(instance.getId()) && "PENDING".equalsIgnoreCase(t.getStatus()))
+                .filter(t -> t.getWorkflowInstance().getId().equals(instance.getId())
+                        && "PENDING".equalsIgnoreCase(t.getStatus()))
                 .findFirst()
                 .map(t -> {
                     if (t.getAssignedApprover() != null) {
@@ -324,17 +347,21 @@ public class WorkflowEngineServiceImpl implements WorkflowEngineService {
         }
         WorkflowInstance instance = wfOpt.get();
 
-        // Find latest action log with remarks (excluding SUBMIT unless it has custom remarks)
+        // Find latest action log with remarks (excluding SUBMIT unless it has custom
+        // remarks)
         return workflowActionLogRepository.findByWorkflowInstanceOrderByStepNumberAsc(instance).stream()
-                .filter(log -> log.getRemarks() != null && !log.getRemarks().trim().isEmpty() && !"SUBMIT".equalsIgnoreCase(log.getAction()))
+                .filter(log -> log.getRemarks() != null && !log.getRemarks().trim().isEmpty()
+                        && !"SUBMIT".equalsIgnoreCase(log.getAction()))
                 .reduce((first, second) -> second) // get the last one (latest)
-                .map(log -> log.getRemarks() + " (by " + log.getActor().getFirstName() + " " + log.getActor().getLastName() + ")")
+                .map(log -> log.getRemarks() + " (by " + log.getActor().getFirstName() + " "
+                        + log.getActor().getLastName() + ")")
                 .orElse("");
     }
 
     private Employee getMaker(WorkflowInstance instance) {
         // First try action logs
-        Optional<Employee> actorOpt = workflowActionLogRepository.findByWorkflowInstanceOrderByStepNumberAsc(instance).stream()
+        Optional<Employee> actorOpt = workflowActionLogRepository.findByWorkflowInstanceOrderByStepNumberAsc(instance)
+                .stream()
                 .filter(log -> "SUBMIT".equalsIgnoreCase(log.getAction()))
                 .map(WorkflowActionLog::getActor)
                 .findFirst();
@@ -349,23 +376,28 @@ public class WorkflowEngineServiceImpl implements WorkflowEngineService {
         if ("LEAVE".equalsIgnoreCase(entityType)) {
             return leaveRequestRepository.findById(entityId)
                     .map(LeaveRequest::getEmployee)
-                    .orElseThrow(() -> new ResourceNotFoundException("Maker not found for Leave entity ID: " + entityId));
+                    .orElseThrow(
+                            () -> new ResourceNotFoundException("Maker not found for Leave entity ID: " + entityId));
         } else if ("TRAVEL".equalsIgnoreCase(entityType)) {
             return travelRequestRepository.findById(entityId)
                     .map(TravelRequest::getEmployee)
-                    .orElseThrow(() -> new ResourceNotFoundException("Maker not found for Travel entity ID: " + entityId));
+                    .orElseThrow(
+                            () -> new ResourceNotFoundException("Maker not found for Travel entity ID: " + entityId));
         } else if ("EXPENSE".equalsIgnoreCase(entityType)) {
             return expenseClaimRepository.findById(entityId)
                     .map(ExpenseClaim::getEmployee)
-                    .orElseThrow(() -> new ResourceNotFoundException("Maker not found for Expense entity ID: " + entityId));
+                    .orElseThrow(
+                            () -> new ResourceNotFoundException("Maker not found for Expense entity ID: " + entityId));
         } else if ("ASSET".equalsIgnoreCase(entityType)) {
             return assetRequestRepository.findById(entityId)
                     .map(AssetRequest::getEmployee)
-                    .orElseThrow(() -> new ResourceNotFoundException("Maker not found for Asset entity ID: " + entityId));
+                    .orElseThrow(
+                            () -> new ResourceNotFoundException("Maker not found for Asset entity ID: " + entityId));
         } else if ("REIMBURSEMENT".equalsIgnoreCase(entityType)) {
             return reimbursementRepository.findById(entityId)
                     .map(Reimbursement::getEmployee)
-                    .orElseThrow(() -> new ResourceNotFoundException("Maker not found for Reimbursement entity ID: " + entityId));
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Maker not found for Reimbursement entity ID: " + entityId));
         }
 
         throw new ResourceNotFoundException("Initiator maker of this workflow could not be found.");
@@ -376,6 +408,9 @@ public class WorkflowEngineServiceImpl implements WorkflowEngineService {
             LeaveRequest req = leaveRequestRepository.findById(entityId)
                     .orElseThrow(() -> new ResourceNotFoundException("Leave request not found"));
             req.setStatus(status);
+            if ("REJECTED".equalsIgnoreCase(status)) {
+
+            }
             leaveRequestRepository.save(req);
         } else if ("TRAVEL".equalsIgnoreCase(entityType)) {
             TravelRequest req = travelRequestRepository.findById(entityId)

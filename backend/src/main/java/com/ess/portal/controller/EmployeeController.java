@@ -35,19 +35,19 @@ public class EmployeeController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('HR_ADMIN', 'SYSTEM_ADMIN', 'REPORTING_MANAGER')")
+    @PreAuthorize("hasAnyRole('HR_ADMIN', 'SUPER_ADMIN', 'REPORTING_MANAGER')")
     public ResponseEntity<EmployeeDto> getEmployeeById(@PathVariable Integer id) {
         return ResponseEntity.ok(employeeService.getEmployeeById(id));
     }
 
     @GetMapping("/emp/{employeeId}")
-    @PreAuthorize("hasAnyRole('HR_ADMIN', 'SYSTEM_ADMIN', 'REPORTING_MANAGER')")
+    @PreAuthorize("hasAnyRole('HR_ADMIN', 'SUPER_ADMIN', 'REPORTING_MANAGER')")
     public ResponseEntity<EmployeeDto> getEmployeeByEmployeeId(@PathVariable String employeeId) {
         return ResponseEntity.ok(employeeService.getEmployeeByEmployeeId(employeeId));
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('HR_ADMIN', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAnyRole('HR_ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<PagedResponse<EmployeeDto>> getAllEmployees(Pageable pageable) {
         return ResponseEntity.ok(employeeService.getAllEmployees(pageable));
     }
@@ -63,13 +63,13 @@ public class EmployeeController {
     }
 
     @PutMapping("/{id}/assign")
-    @PreAuthorize("hasRole('HR_ADMIN')")
+    @PreAuthorize("hasAnyRole('HR_ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<EmployeeDto> assignManagerAndDepartment(@PathVariable Integer id, @RequestBody EmployeeAssignmentRequest request) {
         return ResponseEntity.ok(employeeService.assignManagerAndDepartment(id, request));
     }
 
     @GetMapping("/all")
-    @PreAuthorize("hasAnyRole('HR_ADMIN', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAnyRole('HR_ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<List<EmployeeDto>> getAllEmployeesList() {
         return ResponseEntity.ok(employeeService.getAllEmployeesList());
     }

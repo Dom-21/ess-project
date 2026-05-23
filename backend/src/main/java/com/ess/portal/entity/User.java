@@ -1,5 +1,6 @@
 package com.ess.portal.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -27,9 +28,11 @@ public class User extends BaseEntity {
     @Column(nullable = false, unique = true, length = 100)
     private String email;
 
+    @JsonIgnore
     @Column(nullable = false, length = 255)
     private String password;
 
+    @JsonIgnore
     @Column(name = "refresh_token", length = 255)
     private String refreshToken;
 
