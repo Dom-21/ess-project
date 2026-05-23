@@ -1,0 +1,385 @@
+````md
+# Multiple GitHub Accounts Setup Using SSH (Windows)
+
+This guide helps you use:
+- Personal GitHub account
+- Work GitHub account
+
+without login conflicts.
+
+---
+
+# Why Use SSH?
+
+Using SSH allows:
+- multiple GitHub accounts on same machine
+- automatic account selection per repository
+- no repeated login prompts
+- no HTTPS credential conflicts
+
+---
+
+# Step 1 — Create `.ssh` Folder
+
+Open PowerShell:
+
+```powershell
+mkdir $HOME\.ssh
+````
+
+---
+
+# Step 2 — Generate Personal GitHub SSH Key
+
+```powershell
+ssh-keygen -t ed25519 -C "your-personal-email@gmail.com"
+```
+
+When asked:
+
+```text
+Enter file in which to save the key
+```
+
+Enter:
+
+```text
+C:\Users\<YOUR_USERNAME>\.ssh\id_ed25519_personal
+```
+
+Example:
+
+```text
+C:\Users\danda\.ssh\id_ed25519_personal
+```
+
+You may keep passphrase empty or set one.
+
+---
+
+# Step 3 — Generate Work GitHub SSH Key
+
+```powershell
+ssh-keygen -t ed25519 -C "your-work-email@company.com"
+```
+
+When asked for file location:
+
+```text
+C:\Users\<YOUR_USERNAME>\.ssh\id_ed25519_work
+```
+
+Example:
+
+```text
+C:\Users\danda\.ssh\id_ed25519_work
+```
+
+---
+
+# Step 4 — Verify Generated Files
+
+Run:
+
+```powershell
+dir $HOME\.ssh
+```
+
+You should see:
+
+```text
+id_ed25519_personal
+id_ed25519_personal.pub
+id_ed25519_work
+id_ed25519_work.pub
+```
+
+---
+
+# Step 5 — Create SSH Config File
+
+Open config:
+
+```powershell
+notepad $HOME\.ssh\config
+```
+
+Paste:
+
+```config
+# Personal GitHub
+Host github-personal
+    HostName github.com
+    User git
+    IdentityFile C:/Users/<YOUR_USERNAME>/.ssh/id_ed25519_personal
+
+# Work GitHub
+Host github-work
+    HostName github.com
+    User git
+    IdentityFile C:/Users/<YOUR_USERNAME>/.ssh/id_ed25519_work
+```
+
+Example:
+
+```config
+# Personal GitHub
+Host github-personal
+    HostName github.com
+    User git
+    IdentityFile C:/Users/danda/.ssh/id_ed25519_personal
+
+# Work GitHub
+Host github-work
+    HostName github.com
+    User git
+    IdentityFile C:/Users/danda/.ssh/id_ed25519_work
+```
+
+Save and close.
+
+---
+
+# Step 6 — Start SSH Agent
+
+Run:
+
+```powershell
+Get-Service ssh-agent | Set-Service -StartupType Automatic
+Start-Service ssh-agent
+```
+
+---
+
+# Step 7 — Add SSH Keys to Agent
+
+```powershell
+ssh-add $HOME\.ssh\id_ed25519_personal
+ssh-add $HOME\.ssh\id_ed25519_work
+```
+
+Verify:
+
+```powershell
+ssh-add -l
+```
+
+You should see both keys listed.
+
+---
+
+# Step 8 — Add Public Keys to GitHub
+
+## Personal GitHub Account
+
+Get public key:
+
+```powershell
+cat $HOME\.ssh\id_ed25519_personal.pub
+```
+
+Copy the full output.
+
+Go to:
+
+[https://github.com/settings/keys](https://github.com/settings/keys)
+
+Click:
+
+```text
+New SSH key
+```
+
+Paste the key and save.
+
+---
+
+## Work GitHub Account
+
+Get work public key:
+
+```powershell
+cat $HOME\.ssh\id_ed25519_work.pub
+```
+
+Copy output.
+
+Add it to the work GitHub account at:
+
+[https://github.com/settings/keys](https://github.com/settings/keys)
+
+---
+
+# Step 9 — Test SSH Connections
+
+## Test Personal
+
+```powershell
+ssh -T github-personal
+```
+
+Expected:
+
+```text
+Hi <personal-username>! You've successfully authenticated...
+```
+
+---
+
+## Test Work
+
+```powershell
+ssh -T github-work
+```
+
+Expected:
+
+```text
+Hi <work-username>! You've successfully authenticated...
+```
+
+---
+
+# Step 10 — Configure Repository Remote
+
+## Personal Repository
+
+Inside repo:
+
+```powershell
+git remote set-url origin git@github-personal:USERNAME/REPOSITORY.git
+```
+
+Example:
+
+```powershell
+git remote set-url origin git@github-personal:Dom-21/ess-project.git
+```
+
+---
+
+## Work Repository
+
+```powershell
+git remote set-url origin git@github-work:ORG/REPOSITORY.git
+```
+
+---
+
+# Step 11 — Verify Remote
+
+```powershell
+git remote -v
+```
+
+Example:
+
+```text
+origin  git@github-personal:Dom-21/ess-project.git (fetch)
+origin  git@github-personal:Dom-21/ess-project.git (push)
+```
+
+---
+
+# Step 12 — Push Normally
+
+```powershell
+git push
+```
+
+No login prompt required.
+
+SSH automatically selects correct account.
+
+---
+
+# Cloning Repositories
+
+## Clone Personal Repo
+
+```powershell
+git clone git@github-personal:USERNAME/REPO.git
+```
+
+---
+
+## Clone Work Repo
+
+```powershell
+git clone git@github-work:ORG/REPO.git
+```
+
+---
+
+# Optional — Remove Old HTTPS Credentials
+
+If you previously used HTTPS:
+
+```powershell
+cmdkey /delete:git:https://github.com
+```
+
+---
+
+# Optional — Auto Switch Git User Identity
+
+## Open Global Git Config
+
+```powershell
+notepad $HOME\.gitconfig
+```
+
+Add:
+
+```config
+[includeIf "gitdir:~/Documents/Personal/"]
+    path = ~/.gitconfig-personal
+
+[includeIf "gitdir:~/Documents/Work/"]
+    path = ~/.gitconfig-work
+```
+
+---
+
+## Create Personal Config
+
+```powershell
+notepad $HOME\.gitconfig-personal
+```
+
+```config
+[user]
+    name = Your Name
+    email = your-personal-email@gmail.com
+```
+
+---
+
+## Create Work Config
+
+```powershell
+notepad $HOME\.gitconfig-work
+```
+
+```config
+[user]
+    name = Your Name
+    email = your-work-email@company.com
+```
+
+Now Git automatically switches author identity based on folder.
+
+---
+
+# Final Result
+
+You now have:
+
+* multiple GitHub accounts
+* automatic account selection
+* SSH authentication
+* no credential conflicts
+* clean Git workflow
+
+```
+```

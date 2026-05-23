@@ -1,0 +1,159 @@
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-tr from-slate-100 via-slate-50 to-primary-50 dark:from-slate-950 dark:via-slate-900 dark:to-primary-950/10 px-4 relative overflow-hidden transition-colors duration-200">
+  
+  <!-- Background Decorative Lights -->
+  <div class="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-primary-500/10 blur-[120px] dark:bg-primary-500/5"></div>
+  <div class="absolute -bottom-40 -right-40 w-96 h-96 rounded-full bg-accent-500/10 blur-[120px] dark:bg-accent-500/5"></div>
+
+  <!-- Top Right Floating Theme Toggle -->
+  <div class="absolute top-4 right-4">
+    <button 
+      (click)="themeService.toggleTheme()" 
+      class="p-2 rounded-md bg-white/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 backdrop-blur text-slate-600 dark:text-slate-300 shadow-sm"
+      aria-label="Toggle Theme"
+    >
+      <i [class]="themeService.isDarkMode() ? 'pi pi-sun text-sm' : 'pi pi-moon text-sm'"></i>
+    </button>
+  </div>
+
+  <!-- Main Login Container -->
+  <div class="w-full max-w-sm">
+    
+    <!-- App Title and Brand -->
+    <div class="text-center mb-5">
+      <div class="inline-flex w-10 h-10 rounded-lg bg-gradient-to-tr from-primary-500 to-accent-500 items-center justify-center text-white font-black text-xl shadow mb-2">
+        E
+      </div>
+      <h2 class="font-sans font-black text-xl text-slate-800 dark:text-slate-100 tracking-tight uppercase">
+        ESS Portal
+      </h2>
+      <p class="text-slate-500 dark:text-slate-400 mt-1 font-medium text-[11px]">
+        Sign in to access your self-service workspace
+      </p>
+    </div>
+
+    <!-- Login Card -->
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-md p-6 relative overflow-hidden">
+      
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-4">
+        
+        <!-- Alert Display -->
+        @if (errorMessage()) {
+          <div 
+            class="p-3 rounded-md bg-danger-500/10 dark:bg-danger-500/5 border border-danger-500/20 text-danger-500 text-[11px] font-bold flex items-center gap-2"
+          >
+            <i class="pi pi-exclamation-circle text-sm"></i>
+            <span>{{ errorMessage() }}</span>
+          </div>
+        }
+
+        <!-- Email Input -->
+        <div class="space-y-1">
+          <label for="email" class="text-[10px] font-bold tracking-wider text-slate-500 dark:text-slate-400 uppercase">
+            Email Address
+          </label>
+          <div class="relative">
+            <i class="pi pi-envelope absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 text-xs"></i>
+            <input 
+              id="email"
+              type="email" 
+              formControlName="email"
+              placeholder="Enter email"
+              class="w-full pl-9 pr-3 py-2 rounded-md bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/10 text-xs font-semibold transition-all outline-none"
+              [class.border-danger-500]="isFieldInvalid('email')"
+            />
+          </div>
+        </div>
+
+        <!-- Password Input -->
+        <div class="space-y-1">
+          <label for="password" class="text-[10px] font-bold tracking-wider text-slate-500 dark:text-slate-400 uppercase">
+            Password
+          </label>
+          <div class="relative">
+            <i class="pi pi-lock absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 text-xs"></i>
+            <input 
+              id="password"
+              [type]="showPassword() ? 'text' : 'password'" 
+              formControlName="password"
+              placeholder="Enter password"
+              class="w-full pl-9 pr-9 py-2 rounded-md bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/10 text-xs font-semibold transition-all outline-none"
+              [class.border-danger-500]="isFieldInvalid('password')"
+            />
+            <!-- Visibility toggler -->
+            <button 
+              type="button"
+              (click)="togglePasswordVisibility()" 
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 text-xs"
+              aria-label="Toggle Password Visibility"
+            >
+              <i [class]="showPassword() ? 'pi pi-eye-slash' : 'pi pi-eye'"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Action Button -->
+        <button 
+          type="submit" 
+          [disabled]="loginForm.invalid || loading()"
+          class="w-full py-2.5 rounded-md bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 text-white font-bold text-xs shadow disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-1.5 transition-all active:scale-[0.98]"
+        >
+          @if (loading()) {
+            <i class="pi pi-spin pi-spinner text-sm"></i>
+            <span>Authenticating...</span>
+          } @else {
+            <span>Sign In</span>
+          }
+        </button>
+
+      </form>
+
+      <!-- Quick Logins Divider -->
+      <div class="relative my-5 text-center">
+        <span class="absolute inset-x-0 top-1/2 h-px bg-slate-200 dark:bg-slate-800"></span>
+        <span class="relative px-2 text-[9px] font-bold tracking-wider text-slate-400 uppercase bg-white dark:bg-slate-900">
+          Demo Logins
+        </span>
+      </div>
+
+      <!-- Quick Logins Grid -->
+      <div class="grid grid-cols-2 gap-2">
+        <button 
+          (click)="quickLogin('rohan.sharma@ess.com')"
+          class="px-1 py-2 rounded-md border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-center font-bold text-[10px] transition-all"
+        >
+          <span class="text-primary-500 block mb-0.5">Rohan</span>
+          <span class="text-[8px] text-slate-400 uppercase font-black">Employee</span>
+        </button>
+        <button 
+          (click)="quickLogin('devendra.singh@ess.com')"
+          class="px-1 py-2 rounded-md border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-center font-bold text-[10px] transition-all"
+        >
+          <span class="text-accent-500 block mb-0.5">Devendra</span>
+          <span class="text-[8px] text-slate-400 uppercase font-black">Manager</span>
+        </button>
+        <button 
+          (click)="quickLogin('shalini.sharma@ess.com')"
+          class="px-1 py-2 rounded-md border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-center font-bold text-[10px] transition-all"
+        >
+          <span class="text-success-500 block mb-0.5">Shalini</span>
+          <span class="text-[8px] text-slate-400 uppercase font-black">HR Admin</span>
+        </button>
+        <button 
+          (click)="quickLogin('vijay.mallya@ess.com')"
+          class="px-1 py-2 rounded-md border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-center font-bold text-[10px] transition-all"
+        >
+          <span class="text-danger-500 block mb-0.5">Vijay</span>
+          <span class="text-[8px] text-slate-400 uppercase font-black">Super Admin</span>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <p class="text-center text-[10px] font-bold text-slate-400 dark:text-slate-500 mt-6 uppercase tracking-wider">
+      Secured Corporate ESS Environment © 2026.
+    </p>
+
+  </div>
+
+</div>

@@ -1,0 +1,291 @@
+<div class="space-y-4">
+  
+  <!-- Summary and Metric Header -->
+  <div class="bg-white dark:bg-slate-900 rounded-lg p-4 border border-slate-200 dark:border-slate-800/80 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+    <div class="text-center sm:text-left">
+      <h2 class="font-black text-lg text-slate-850 dark:text-slate-100 leading-tight">
+        Workflow Approval Inbox
+      </h2>
+      <p class="text-slate-400 dark:text-slate-500 mt-0.5 font-bold text-xs">
+        Review and action employee requests under the Maker-Checker workflow policy.
+      </p>
+    </div>
+
+    <div class="px-4 py-2 rounded bg-gradient-to-tr from-primary-500 to-accent-500 text-white text-center shadow-sm shrink-0">
+      <span class="block text-xl font-black">{{ tasks().length }}</span>
+      <span class="text-[8px] font-black uppercase tracking-widest text-white/90">Pending Tasks</span>
+    </div>
+  </div>
+
+  <!-- Pending Workflow Tasks Log -->
+  <div class="bg-white dark:bg-slate-900 rounded-lg p-4 border border-slate-200 dark:border-slate-800/80 shadow-sm">
+    <app-page-header title="Pending Request Queue" subtitle="List of tasks currently awaiting your review and approval action"></app-page-header>
+
+    <div class="space-y-3">
+      @for (task of tasks(); track task.id) {
+        <div class="rounded border border-slate-200 dark:border-slate-800/80 bg-slate-50/20 dark:bg-slate-900/30 overflow-hidden transition-all duration-200 shadow-xs">
+          
+          <!-- Task Primary Info -->
+          <div class="p-3 flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <!-- Visual Indicator Icon based on entity type -->
+              <div 
+                [class]="getTypeIconClass(task.workflowInstance?.workflowConfig?.entityType)"
+                class="w-8 h-8 rounded flex items-center justify-center text-sm shadow-inner shrink-0"
+              >
+                <i [class]="getTypeIcon(task.workflowInstance?.workflowConfig?.entityType)"></i>
+              </div>
+
+              <div>
+                <div class="flex flex-wrap items-center gap-1.5 mb-0.5">
+                  <span class="font-black text-xs text-slate-800 dark:text-slate-100">
+                    {{ task.workflowInstance?.workflowConfig?.name }}
+                  </span>
+                  <span 
+                    [class]="getTypeLabelClass(task.workflowInstance?.workflowConfig?.entityType)"
+                    class="px-1.5 py-0.5 text-[8px] font-extrabold rounded border uppercase"
+                  >
+                    {{ task.workflowInstance?.workflowConfig?.entityType }}
+                  </span>
+                  <span class="text-slate-400 dark:text-slate-500 text-[9px] font-bold">
+                    #Instance-{{ task.workflowInstance?.id }}
+                  </span>
+                </div>
+                
+                <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-slate-400 dark:text-slate-500 font-bold">
+                  <span class="flex items-center gap-1">
+                    <i class="pi pi-user text-primary-500 text-[8px]"></i>
+                    <span>Step Assigned: Level {{ task.stepNumber }}</span>
+                  </span>
+                  <span class="h-2 w-px bg-slate-200 dark:bg-slate-800"></span>
+                  <span class="flex items-center gap-1">
+                    <i class="pi pi-clock text-accent-500 text-[8px]"></i>
+                    <span>Assigned: {{ task.createdAt | date:'short' }}</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Action Controls / Expand Toggle -->
+            <div class="flex items-center gap-2 self-end lg:self-center">
+              <button 
+                (click)="toggleDetails(task)"
+                class="px-2.5 py-1 rounded text-[10px] font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 text-slate-700 dark:text-slate-355 transition-all flex items-center gap-1.5"
+              >
+                <span>{{ isExpanded(task.id) ? 'Hide Details' : 'View Details' }}</span>
+                <i [class]="isExpanded(task.id) ? 'pi pi-chevron-up' : 'pi pi-chevron-down'" class="text-[8px]"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Task Expansion Details (Dynamic Data Loading) -->
+          @if (isExpanded(task.id)) {
+            <div class="border-t border-slate-200 dark:border-slate-800/80 bg-white/70 dark:bg-slate-900/60 p-3 space-y-4">
+              
+              <!-- Loading Indicator -->
+              @if (expandedDetails[task.id]?.loading) {
+                <div class="text-center py-4 text-slate-400">
+                  <i class="pi pi-spin pi-spinner text-lg mb-1 block"></i>
+                  <span class="text-[10px] font-bold">Loading request parameters...</span>
+                </div>
+              }
+
+              <!-- Error Indicator -->
+              @if (expandedDetails[task.id]?.error) {
+                <div class="p-2.5 rounded bg-danger-500/10 border border-danger-500/25 text-danger-500 text-[10px] font-bold text-center">
+                  {{ expandedDetails[task.id]?.error }}
+                </div>
+              }
+
+              <!-- Real Data Content -->
+              @if (!expandedDetails[task.id]?.loading && expandedDetails[task.id]?.data) {
+                <div class="space-y-4">
+                  
+                  <!-- Entity Parameter Grid -->
+                  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 p-3 rounded bg-slate-50/50 dark:bg-slate-950/20 border border-slate-100 dark:border-slate-900/50">
+                    
+                    @switch (task.workflowInstance?.workflowConfig?.entityType) {
+                      
+                      @case ('LEAVE') {
+                        <div class="space-y-0.5">
+                          <span class="text-[8px] font-extrabold uppercase text-slate-400 block tracking-wider">Leave Period</span>
+                          <span class="text-xs font-bold text-slate-800 dark:text-slate-200">
+                            {{ expandedDetails[task.id].data.startDate | date:'mediumDate' }} to {{ expandedDetails[task.id].data.endDate | date:'mediumDate' }}
+                          </span>
+                        </div>
+                        <div class="space-y-0.5">
+                          <span class="text-[8px] font-extrabold uppercase text-slate-400 block tracking-wider">Total Duration</span>
+                          <span class="text-xs font-black text-primary-500">
+                            {{ expandedDetails[task.id].data.totalDays }} Days
+                          </span>
+                        </div>
+                        <div class="space-y-0.5 sm:col-span-2 md:col-span-3">
+                          <span class="text-[8px] font-extrabold uppercase text-slate-400 block tracking-wider">Leave Reason</span>
+                          <span class="text-xs font-semibold text-slate-600 dark:text-slate-300">
+                            {{ expandedDetails[task.id].data.reason }}
+                          </span>
+                        </div>
+                      }
+
+                      @case ('TRAVEL') {
+                        <div class="space-y-0.5">
+                          <span class="text-[8px] font-extrabold uppercase text-slate-400 block tracking-wider">Trip Schedule</span>
+                          <span class="text-xs font-bold text-slate-800 dark:text-slate-200">
+                            {{ expandedDetails[task.id].data.departureDate | date:'mediumDate' }} to {{ expandedDetails[task.id].data.returnDate | date:'mediumDate' }}
+                          </span>
+                        </div>
+                        <div class="space-y-0.5">
+                          <span class="text-[8px] font-extrabold uppercase text-slate-400 block tracking-wider">Destination</span>
+                          <span class="text-xs font-bold text-slate-800 dark:text-slate-200">
+                            {{ expandedDetails[task.id].data.destination }}
+                          </span>
+                        </div>
+                        <div class="space-y-0.5">
+                          <span class="text-[8px] font-extrabold uppercase text-slate-400 block tracking-wider">Allocated Budget</span>
+                          <span class="text-xs font-black text-primary-500">
+                            ₹{{ expandedDetails[task.id].data.budget | number:'1.2-2' }}
+                          </span>
+                        </div>
+                        <div class="space-y-0.5">
+                          <span class="text-[8px] font-extrabold uppercase text-slate-400 block tracking-wider">Advance Requested</span>
+                          <span class="text-xs font-bold text-slate-800 dark:text-slate-200">
+                            ₹{{ expandedDetails[task.id].data.advanceAmount || 0 | number:'1.2-2' }}
+                          </span>
+                        </div>
+                        <div class="space-y-0.5 sm:col-span-2">
+                          <span class="text-[8px] font-extrabold uppercase text-slate-400 block tracking-wider">Purpose of Trip</span>
+                          <span class="text-xs font-semibold text-slate-600 dark:text-slate-300">
+                            {{ expandedDetails[task.id].data.purpose }}
+                          </span>
+                        </div>
+                      }
+
+                      @case ('EXPENSE') {
+                        <div class="space-y-0.5">
+                          <span class="text-[8px] font-extrabold uppercase text-slate-400 block tracking-wider">Expense Item / Category</span>
+                          <span class="text-xs font-bold text-slate-800 dark:text-slate-200">
+                            {{ expandedDetails[task.id].data.category }}
+                          </span>
+                        </div>
+                        <div class="space-y-0.5">
+                          <span class="text-[8px] font-extrabold uppercase text-slate-400 block tracking-wider">Requested Amount</span>
+                          <span class="text-xs font-black text-primary-500">
+                            ₹{{ expandedDetails[task.id].data.amount | number:'1.2-2' }}
+                          </span>
+                        </div>
+                        <div class="space-y-0.5">
+                          <span class="text-[8px] font-extrabold uppercase text-slate-400 block tracking-wider">Transaction Date</span>
+                          <span class="text-xs font-bold text-slate-800 dark:text-slate-200">
+                            {{ expandedDetails[task.id].data.expenseDate | date:'mediumDate' }}
+                          </span>
+                        </div>
+                        <div class="space-y-0.5 sm:col-span-2 md:col-span-3">
+                          <span class="text-[8px] font-extrabold uppercase text-slate-400 block tracking-wider">Claim Description</span>
+                          <span class="text-xs font-semibold text-slate-600 dark:text-slate-300">
+                            {{ expandedDetails[task.id].data.description }}
+                          </span>
+                        </div>
+                      }
+
+                      @case ('ASSET') {
+                        <div class="space-y-0.5">
+                          <span class="text-[8px] font-extrabold uppercase text-slate-400 block tracking-wider">Requesting Employee</span>
+                          <span class="text-xs font-bold text-slate-800 dark:text-slate-200">
+                            {{ expandedDetails[task.id].data.employeeName }}
+                          </span>
+                        </div>
+                        <div class="space-y-0.5">
+                          <span class="text-[8px] font-extrabold uppercase text-slate-400 block tracking-wider">Purpose</span>
+                          <span class="text-xs font-bold text-slate-800 dark:text-slate-200">
+                            {{ expandedDetails[task.id].data.purpose }}
+                          </span>
+                        </div>
+                        <div class="space-y-0.5 sm:col-span-2 md:col-span-3">
+                          <span class="text-[8px] font-extrabold uppercase text-slate-400 block tracking-wider">Hardware Request Details</span>
+                          <span class="text-xs font-semibold text-slate-600 dark:text-slate-300">
+                            {{ expandedDetails[task.id].data.additionalNotes || 'No custom notes provided' }}
+                          </span>
+                        </div>
+                      }
+
+                      @default {
+                        <div class="space-y-0.5 sm:col-span-3">
+                          <span class="text-[8px] font-extrabold uppercase text-slate-400 block tracking-wider">Details</span>
+                          <span class="text-xs font-bold text-slate-800 dark:text-slate-200">
+                            Primary Entity ID: #{{ task.workflowInstance?.entityId }} (Type: {{ task.workflowInstance?.workflowConfig?.entityType }})
+                          </span>
+                        </div>
+                      }
+                    }
+
+                  </div>
+
+                  <!-- Approval Form (Maker-Checker actions with validation) -->
+                  <div class="pt-3 border-t border-slate-100 dark:border-slate-800/60 space-y-2">
+                    <div class="space-y-1">
+                      <label [for]="'remarks-' + task.id" class="text-[9px] font-extrabold uppercase tracking-wider text-slate-400">
+                        Approval / Rejection Remarks
+                      </label>
+                      <textarea 
+                        [id]="'remarks-' + task.id"
+                        [(ngModel)]="remarksMap[task.id]"
+                        rows="1.5"
+                        placeholder="Add assessment remarks (required for rejections)..."
+                        class="w-full px-3 py-1.5 rounded bg-slate-50/50 dark:bg-slate-950/20 border border-slate-200 dark:border-slate-800 outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/10 text-xs font-semibold resize-none"
+                      ></textarea>
+                    </div>
+
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <button 
+                        (click)="actionTask(task, 'APPROVE')"
+                        [disabled]="loadingAction[task.id]"
+                        class="px-3 py-1 rounded bg-success-500 text-white text-[10px] font-black shadow-xs hover:opacity-95 disabled:opacity-50 flex items-center gap-1"
+                      >
+                        <i class="pi pi-check text-[9px]"></i>
+                        <span>Approve Request</span>
+                      </button>
+
+                      <button 
+                        (click)="actionTask(task, 'REJECT')"
+                        [disabled]="loadingAction[task.id] || !remarksMap[task.id] || remarksMap[task.id].trim().length < 5"
+                        class="px-3 py-1 rounded bg-danger-500 text-white text-[10px] font-black shadow-xs hover:opacity-95 disabled:opacity-50 flex items-center gap-1"
+                      >
+                        <i class="pi pi-times text-[9px]"></i>
+                        <span>Reject Request</span>
+                      </button>
+                      
+                      @if (!remarksMap[task.id] || remarksMap[task.id].trim().length < 5) {
+                        <span class="text-[9px] text-danger-500 font-bold ml-1 animate-pulse">
+                          * Enter at least 5 chars in remarks to enable Reject button
+                        </span>
+                      }
+                    </div>
+                  </div>
+
+                </div>
+              }
+            </div>
+          }
+
+        </div>
+      }
+
+      <!-- Empty pending state -->
+      @if (tasks().length === 0) {
+        <div class="text-center py-10">
+          <div class="w-10 h-10 rounded bg-success-500/10 border border-success-500/15 text-success-500 flex items-center justify-center text-lg mx-auto mb-2">
+            <i class="pi pi-check-circle animate-bounce"></i>
+          </div>
+          <h4 class="font-bold text-xs text-slate-800 dark:text-slate-100">
+            Your workflow inbox is clean!
+          </h4>
+          <p class="text-slate-400 dark:text-slate-500 mt-0.5 font-bold text-[10px]">
+            All Maker-Checker tickets assigned to you have been assessed.
+          </p>
+        </div>
+      }
+
+    </div>
+  </div>
+
+</div>

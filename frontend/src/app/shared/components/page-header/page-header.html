@@ -1,0 +1,10 @@
+<div class="flex flex-col gap-0.5 border-l-4 border-primary-500 pl-3 py-0.5 mb-4">
+  <h2 class="text-sm font-extrabold text-slate-800 dark:text-slate-100 tracking-tight leading-none uppercase">
+    {{ title() }}
+  </h2>
+  @if (subtitle()) {
+    <p class="text-[10px] font-medium text-slate-400 leading-none">
+      {{ subtitle() }}
+    </p>
+  }
+</div>

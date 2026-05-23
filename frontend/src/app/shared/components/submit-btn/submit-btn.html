@@ -1,0 +1,15 @@
+<button 
+  type="submit" 
+  [disabled]="disabled() || loading()"
+  class="px-4 py-2 rounded-md bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 text-white font-bold text-xs shadow-md shadow-primary-500/10 transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-1.5"
+>
+  @if (loading()) {
+    <i class="pi pi-spin pi-spinner text-xs"></i>
+    <span>{{ loadingLabel() }}</span>
+  } @else {
+    @if (icon()) {
+      <i [class]="icon() + ' text-xs'"></i>
+    }
+    <span>{{ label() }}</span>
+  }
+</button>

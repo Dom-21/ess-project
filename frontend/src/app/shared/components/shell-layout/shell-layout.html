@@ -1,0 +1,184 @@
+<div class="min-h-screen flex bg-slate-100/50 dark:bg-slate-950 transition-colors duration-200">
+  
+  <!-- Responsive Sidebar -->
+  <aside 
+    [class.translate-x-0]="sidebarOpen()" 
+    [class.-translate-x-full]="!sidebarOpen()"
+    class="fixed inset-y-0 left-0 z-40 w-56 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800/80 flex flex-col transition-transform duration-300 md:translate-x-0 md:static md:h-screen shrink-0"
+  >
+    <!-- Branding Logo -->
+    <div class="h-12 flex items-center justify-between px-4 border-b border-slate-200 dark:border-slate-800/80">
+      <div class="flex items-center gap-2">
+        <div class="w-6.5 h-6.5 rounded bg-gradient-to-tr from-primary-500 to-accent-500 flex items-center justify-center text-white font-black text-sm shadow">
+          E
+        </div>
+        <span class="font-sans font-extrabold text-sm tracking-tight bg-gradient-to-r from-primary-500 to-accent-500 bg-clip-text text-transparent uppercase">
+          ESS Portal
+        </span>
+      </div>
+      <!-- Close button on Mobile -->
+      <button (click)="toggleSidebar()" class="p-1 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 md:hidden" aria-label="Close Sidebar">
+        <i class="pi pi-times text-xs"></i>
+      </button>
+    </div>
+
+    <!-- Navigation Links -->
+    <nav class="flex-1 px-2.5 py-3 space-y-0.5 overflow-y-auto">
+      @for (item of navItems; track item.label) {
+        @if (item.visible()) {
+          <a 
+            [routerLink]="item.route"
+            routerLinkActive="bg-gradient-to-r from-primary-500 to-accent-500 text-white shadow-sm font-semibold"
+            [routerLinkActiveOptions]="{ exact: item.route === '/dashboard' }"
+            (click)="closeMobileSidebar()"
+            class="flex items-center justify-between px-3 py-1.5 rounded-md text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all duration-150 group"
+          >
+            <div class="flex items-center gap-2.5">
+              <i [class]="item.icon + ' text-sm group-hover:text-primary-500 transition-colors duration-150'"></i>
+              <span class="text-xs font-semibold">{{ item.label }}</span>
+            </div>
+            @if (item.badge && item.badge()) {
+              <span 
+                class="px-1.5 py-0.5 text-[9px] font-black rounded bg-danger-500 text-white animate-pulse"
+              >
+                {{ item.badge() }}
+              </span>
+            }
+          </a>
+        }
+      }
+    </nav>
+
+    <!-- Current User Profile Widget -->
+    <div class="p-2 border-t border-slate-200 dark:border-slate-800/80">
+      <div class="flex items-center gap-2.5 p-1.5 rounded-md bg-slate-100/50 dark:bg-slate-900/50">
+        <div class="w-8 h-8 rounded bg-primary-100 dark:bg-primary-900/40 text-primary-500 flex items-center justify-center font-extrabold text-sm uppercase">
+          {{ authService.session()?.firstName?.charAt(0) }}
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-xs font-bold text-slate-800 dark:text-slate-100 truncate leading-tight">
+            {{ authService.userFullName() }}
+          </p>
+          <p class="text-[9px] text-slate-400 truncate capitalize font-bold leading-none mt-0.5">
+            {{ (authService.userRoles()[0] || '').toLowerCase().replace('_', ' ') }}
+          </p>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Sidebar Backdrop on Mobile -->
+  @if (sidebarOpen()) {
+    <div 
+      (click)="toggleSidebar()" 
+      class="fixed inset-0 z-30 bg-slate-950/20 backdrop-blur-xs md:hidden"
+    ></div>
+  }
+
+  <!-- Main Workspace -->
+  <div class="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+    
+    <!-- Header -->
+    <header class="h-12 flex items-center justify-between px-4 border-b border-slate-200 dark:border-slate-800/80 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md shrink-0 z-20">
+      <div class="flex items-center gap-3">
+        <!-- Sidebar trigger -->
+        <button (click)="toggleSidebar()" class="p-1 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 md:hidden" aria-label="Open Sidebar">
+          <i class="pi pi-bars text-sm"></i>
+        </button>
+        <h1 class="font-sans font-black text-sm text-slate-800 dark:text-slate-100 uppercase tracking-wider">
+          {{ currentTitle() }}
+        </h1>
+      </div>
+
+      <div class="flex items-center gap-2">
+        
+        <!-- Theme Toggle -->
+        <button 
+          (click)="themeService.toggleTheme()" 
+          class="p-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors duration-150"
+          aria-label="Toggle Theme"
+        >
+          <i [class]="themeService.isDarkMode() ? 'pi pi-sun text-sm' : 'pi pi-moon text-sm'"></i>
+        </button>
+
+        <!-- Notifications Dropdown -->
+        <div class="relative">
+          <button 
+            (click)="toggleNotifications()"
+            class="relative p-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors duration-150"
+            aria-label="Notifications"
+          >
+            <i class="pi pi-bell text-sm"></i>
+            @if (notificationService.unreadCount() > 0) {
+              <span 
+                class="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-danger-500 ring-2 ring-white dark:ring-slate-900"
+              ></span>
+            }
+          </button>
+
+          <!-- Notifications Menu -->
+          @if (showNotifications()) {
+            <div 
+              class="absolute right-0 mt-2 w-72 rounded-md bg-white dark:bg-slate-900 shadow-lg border border-slate-200 dark:border-slate-850 py-1.5 z-50 overflow-hidden"
+            >
+              <div class="px-3 py-1 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                <span class="font-bold text-xs">Notifications</span>
+                @if (notificationService.unreadCount() > 0) {
+                  <button 
+                    (click)="markAllAsRead()" 
+                    class="text-[10px] font-bold text-primary-500 hover:text-primary-600"
+                  >
+                    Mark all read
+                  </button>
+                }
+              </div>
+              <div class="max-h-60 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800">
+                @if (notificationService.notifications().length === 0) {
+                  <div class="p-6 text-center text-slate-400 text-xs font-semibold">
+                    <i class="pi pi-inbox text-2xl mb-1 block"></i>
+                    No new alerts
+                  </div>
+                } @else {
+                  @for (notif of notificationService.notifications(); track notif.id) {
+                    <div 
+                      (click)="readNotification(notif.id)"
+                      class="p-2.5 flex gap-2 hover:bg-slate-50 dark:hover:bg-slate-900/60 cursor-pointer transition-colors"
+                      [class.bg-slate-50\/40]="!notif.read"
+                    >
+                      <div class="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 bg-primary-500" [class.invisible]="notif.read"></div>
+                      <div class="flex-1 min-w-0">
+                        <p class="text-[11px] text-slate-700 dark:text-slate-200 leading-normal" [class.font-bold]="!notif.read">
+                          {{ notif.message }}
+                        </p>
+                        <span class="text-[9px] text-slate-400 font-bold block mt-0.5">
+                          {{ notif.createdAt | date:'shortTime' }}
+                        </span>
+                      </div>
+                    </div>
+                  }
+                }
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="h-4 w-px bg-slate-200 dark:bg-slate-800 mx-0.5"></div>
+
+        <!-- Logout Button -->
+        <button 
+          (click)="authService.logout()" 
+          class="p-1.5 rounded-md hover:bg-danger-50 dark:hover:bg-danger-950/30 text-danger-500 transition-colors duration-150"
+          aria-label="Logout"
+        >
+          <i class="pi pi-power-off text-sm"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Body Workspace -->
+    <main class="flex-1 p-4 overflow-y-auto bg-slate-100/50 dark:bg-slate-950/20">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+
+</div>

@@ -1,0 +1,128 @@
+@if (profile()) {
+  <div class="space-y-4">
+    
+    <!-- Premium Header Card -->
+    <div class="bg-white dark:bg-slate-900 rounded-lg p-4 border border-slate-200 dark:border-slate-800/80 shadow-sm flex flex-col md:flex-row items-center gap-4 relative overflow-hidden">
+      <!-- Small Avatar -->
+      <div class="w-16 h-16 rounded bg-gradient-to-tr from-primary-500 to-accent-500 text-white font-extrabold text-2xl uppercase flex items-center justify-center shadow-md shrink-0">
+        {{ profile().firstName?.charAt(0) }}
+      </div>
+      
+      <div class="flex-1 text-center md:text-left min-w-0">
+        <h2 class="font-black text-lg text-slate-850 dark:text-slate-100 leading-tight">
+          {{ profile().firstName }} {{ profile().lastName }}
+        </h2>
+        <p class="text-primary-500 font-bold text-xs tracking-wide mt-0.5 uppercase">
+          {{ profile().designation?.title }}
+        </p>
+        
+        <div class="flex flex-wrap justify-center md:justify-start gap-3 mt-2 text-[10px] font-bold text-slate-400 dark:text-slate-500">
+          <span class="flex items-center gap-1">
+            <i class="pi pi-building text-primary-500 text-[8px]"></i>
+            <span>{{ profile().department?.name }}</span>
+          </span>
+          <span class="h-3 w-px bg-slate-200 dark:bg-slate-800 hidden sm:inline"></span>
+          <span class="flex items-center gap-1">
+            <i class="pi pi-id-card text-accent-500 text-[8px]"></i>
+            <span>ID: {{ profile().employeeId }}</span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Core Profile Details Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      
+      <!-- Sidebar Structure -->
+      <div class="bg-white dark:bg-slate-900 rounded-lg p-4 border border-slate-200 dark:border-slate-800/80 shadow-sm flex flex-col gap-4">
+        <h3 class="font-bold text-[10px] text-slate-400 uppercase tracking-wider">
+          Reporting Structure
+        </h3>
+        
+        <div class="space-y-3">
+          <!-- Reporting Manager Node -->
+          <div class="p-3 rounded border border-slate-150 dark:border-slate-800 bg-slate-50/20 dark:bg-slate-900/40 relative">
+            <span class="absolute top-2.5 right-2.5 text-[8px] font-black text-primary-500 uppercase bg-primary-500/10 px-1.5 py-0.5 rounded">Manager</span>
+            <p class="text-[9px] font-bold text-slate-400">Reporting To</p>
+            
+            @if (profile().reportingManager) {
+              <div class="flex items-center gap-2 mt-2">
+                <div class="w-6 h-6 rounded bg-accent-100 dark:bg-accent-950/20 text-accent-500 flex items-center justify-center font-bold text-xs uppercase">
+                  {{ profile().reportingManager?.firstName?.charAt(0) }}
+                </div>
+                <div>
+                  <p class="text-xs font-bold text-slate-800 dark:text-slate-100 leading-none">
+                    {{ profile().reportingManager?.firstName }} {{ profile().reportingManager?.lastName }}
+                  </p>
+                  <p class="text-[9px] font-bold text-slate-400 mt-1 uppercase">
+                    {{ profile().reportingManager?.designation?.title || 'Manager' }}
+                  </p>
+                </div>
+              </div>
+            } @else {
+              <p class="text-xs font-bold text-slate-850 dark:text-slate-200 mt-2">
+                No reporting manager assigned (CEO level)
+              </p>
+            }
+          </div>
+
+          <!-- Joining Date Card -->
+          <div class="p-3 rounded border border-slate-150 dark:border-slate-800 bg-slate-50/20 dark:bg-slate-900/40">
+            <p class="text-[9px] font-bold text-slate-400">Company Joining Date</p>
+            <p class="text-xs font-extrabold text-slate-800 dark:text-slate-200 mt-1">
+              {{ profile().joiningDate | date:'mediumDate' }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Details Grid Panel -->
+      <div class="md:col-span-2 bg-white dark:bg-slate-900 rounded-lg p-4 border border-slate-200 dark:border-slate-800/80 shadow-sm">
+        <h3 class="font-bold text-[10px] text-slate-400 uppercase tracking-wider mb-4">
+          Personal & Professional Metadata
+        </h3>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-4">
+          
+          <div class="space-y-0.5">
+            <span class="text-[9px] font-bold text-slate-450 uppercase tracking-wider block">Email Address</span>
+            <span class="text-xs font-bold text-slate-800 dark:text-slate-200 break-all">
+              {{ profile().user?.email }}
+            </span>
+          </div>
+
+          <div class="space-y-0.5">
+            <span class="text-[9px] font-bold text-slate-450 uppercase tracking-wider block">Phone Number</span>
+            <span class="text-xs font-bold text-slate-800 dark:text-slate-200">
+              {{ profile().phoneNumber || 'Not provided' }}
+            </span>
+          </div>
+
+          <div class="space-y-0.5">
+            <span class="text-[9px] font-bold text-slate-450 uppercase tracking-wider block">Gender</span>
+            <span class="text-xs font-bold text-slate-800 dark:text-slate-200 capitalize">
+              {{ profile().gender?.toLowerCase() || 'Not specified' }}
+            </span>
+          </div>
+
+          <div class="space-y-0.5">
+            <span class="text-[9px] font-bold text-slate-450 uppercase tracking-wider block">Date of Birth</span>
+            <span class="text-xs font-bold text-slate-800 dark:text-slate-200">
+              {{ profile().dateOfBirth | date:'mediumDate' }}
+            </span>
+          </div>
+
+          <div class="space-y-0.5 sm:col-span-2">
+            <span class="text-[9px] font-bold text-slate-450 uppercase tracking-wider block">Residential Address</span>
+            <span class="text-xs font-bold text-slate-800 dark:text-slate-200">
+              {{ profile().address || 'Not provided' }}
+            </span>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+}

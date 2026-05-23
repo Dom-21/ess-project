@@ -1,0 +1,68 @@
+@import "tailwindcss";
+@import "primeicons/primeicons.css";
+
+@theme {
+  --font-sans: "Nunito", system-ui, -apple-system, sans-serif;
+  --font-display: "Nunito", system-ui, -apple-system, sans-serif;
+
+  /* Premium HSL tailwind colors */
+  --color-primary-50: hsl(220, 100%, 97%);
+  --color-primary-100: hsl(220, 100%, 92%);
+  --color-primary-200: hsl(220, 100%, 84%);
+  --color-primary-500: hsl(224, 85%, 58%);
+  --color-primary-600: hsl(224, 76%, 48%);
+  --color-primary-700: hsl(224, 76%, 38%);
+  
+  --color-accent-50: hsl(262, 80%, 97%);
+  --color-accent-100: hsl(262, 80%, 92%);
+  --color-accent-500: hsl(262, 83%, 58%);
+  --color-accent-600: hsl(262, 70%, 48%);
+
+  --color-success-500: hsl(142, 76%, 36%);
+  --color-warning-500: hsl(38, 92%, 50%);
+  --color-danger-500: hsl(350, 89%, 60%);
+}
+
+/* Base custom styles */
+@layer base {
+  html, body {
+    height: 100%;
+    margin: 0;
+    font-family: var(--font-sans);
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    font-weight: 700;
+  }
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.3);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.6);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(75, 85, 99, 0.4);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(75, 85, 99, 0.7);
+}

@@ -1,0 +1,16 @@
+<div class="space-y-1">
+  <label [attr.for]="id()" class="text-xs font-bold tracking-wider text-slate-500 dark:text-slate-400 uppercase flex items-center gap-1">
+    {{ label() }}
+    @if (required()) {
+      <span class="text-danger-500">*</span>
+    }
+  </label>
+  <div class="relative">
+    <ng-content></ng-content>
+  </div>
+  @if (error()) {
+    <p class="text-[11px] font-bold text-danger-500">
+      {{ error() === true ? (label() + ' is invalid') : error() }}
+    </p>
+  }
+</div>
