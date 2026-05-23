@@ -20,4 +20,5 @@ public class JwtResponse {
     private String lastName;
     private List<String> roles;
     private List<String> permissions;
+    private String theme;
 }

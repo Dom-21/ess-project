@@ -113,44 +113,44 @@
         <table class="w-full text-left border-collapse">
           <thead>
             <tr class="border-b border-slate-100 dark:border-slate-800 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
-              <th class="pb-2 pl-2">Device Info</th>
-              <th class="pb-2">Specifications / Notes</th>
-              <th class="pb-2">Submitted Date</th>
-              <th class="pb-2">Assigned Date</th>
-              <th class="pb-2">Pending With</th>
-              <th class="pb-2 text-center">Status</th>
-              <th class="pb-2">Remarks / Feedback</th>
-              <th class="pb-2 pr-2 text-right">Actions</th>
+              <th class="pb-2 pl-2 whitespace-nowrap">Device Info</th>
+              <th class="pb-2 whitespace-nowrap">Specifications / Notes</th>
+              <th class="pb-2 whitespace-nowrap">Submitted Date</th>
+              <th class="pb-2 whitespace-nowrap">Assigned Date</th>
+              <th class="pb-2 whitespace-nowrap">Pending With</th>
+              <th class="pb-2 text-center whitespace-nowrap">Status</th>
+              <th class="pb-2 whitespace-nowrap">Remarks / Feedback</th>
+              <th class="pb-2 pr-2 text-right whitespace-nowrap">Actions</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100/60 dark:divide-slate-800/60">
             @for (request of requests(); track request.id) {
               <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/30 text-xs font-semibold text-slate-700 dark:text-slate-355">
-                <td class="py-2.5 pl-2 font-bold text-slate-850 dark:text-slate-200">
+                <td class="py-2.5 pl-2 font-bold text-slate-850 dark:text-slate-200 whitespace-nowrap">
                   <div class="flex flex-col">
                     <span>{{ request.purpose || 'Device Request' }}</span>
                     <span class="text-[9px] text-slate-400 font-bold">ID: #{{ request.id }}</span>
                   </div>
                 </td>
-                <td class="py-2.5 text-slate-550 dark:text-slate-400 max-w-[200px] truncate">
+                <td class="py-2.5 text-slate-550 dark:text-slate-400 max-w-[200px] truncate whitespace-nowrap">
                   {{ request.additionalNotes || 'N/A' }}
                 </td>
-                <td class="py-2.5 text-slate-500 dark:text-slate-400">
+                <td class="py-2.5 text-slate-500 dark:text-slate-400 whitespace-nowrap">
                   {{ request.createdAt | date:'mediumDate' }}
                 </td>
-                <td class="py-2.5 text-slate-500 dark:text-slate-400">
+                <td class="py-2.5 text-slate-500 dark:text-slate-400 whitespace-nowrap">
                   {{ request.assignedDate ? (request.assignedDate | date:'mediumDate') : '--' }}
                 </td>
-                <td class="py-2.5 text-[11px] font-extrabold text-accent-500">
+                <td class="py-2.5 text-[11px] font-extrabold text-accent-500 whitespace-nowrap">
                   {{ request.currentApprover || 'System' }}
                 </td>
-                <td class="py-2.5 text-center">
+                <td class="py-2.5 text-center whitespace-nowrap">
                   <app-status-badge [status]="request.status"></app-status-badge>
                 </td>
-                <td class="py-2.5 max-w-xs truncate text-[11px] font-medium text-slate-400">
+                <td class="py-2.5 max-w-xs truncate text-[11px] font-medium text-slate-400 whitespace-nowrap">
                   {{ request.approverRemarks || 'N/A' }}
                 </td>
-                <td class="py-2.5 pr-2 text-right">
+                <td class="py-2.5 pr-2 text-right whitespace-nowrap">
                   @if (request.status === 'APPROVED') {
                     <button 
                       (click)="returnAsset(request.id)"

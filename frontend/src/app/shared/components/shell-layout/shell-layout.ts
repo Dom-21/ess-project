@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../core/services/auth.service';
 import { ThemeService } from '../../../core/services/theme.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { PortalService } from '../../../core/services/portal.service';
 import { filter, Subscription } from 'rxjs';
 
 interface NavItem {
@@ -25,6 +26,7 @@ export class ShellLayoutComponent implements OnInit, OnDestroy {
   readonly themeService = inject(ThemeService);
   readonly notificationService = inject(NotificationService);
   private readonly router = inject(Router);
+  private readonly portalService = inject(PortalService);
 
   sidebarOpen = signal<boolean>(false);
   showNotifications = signal<boolean>(false);
@@ -130,6 +132,17 @@ export class ShellLayoutComponent implements OnInit, OnDestroy {
 
   markAllAsRead(): void {
     this.notificationService.markAllAsRead().subscribe();
+  }
+
+  toggleTheme(): void {
+    this.themeService.toggleTheme();
+    const newTheme = this.themeService.isDarkMode() ? 'dark' : 'light';
+    if (this.authService.isAuthenticated()) {
+      this.portalService.updateTheme(newTheme).subscribe({
+        error: (err) => console.error('Failed to sync theme to backend database', err)
+      });
+      this.authService.updateSessionTheme(newTheme);
+    }
   }
 
   private updateTitle(url: string): void {

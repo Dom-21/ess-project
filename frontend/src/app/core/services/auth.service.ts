@@ -2,6 +2,7 @@ import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap, catchError, throwError } from 'rxjs';
+import { ThemeService } from './theme.service';
 
 export interface UserSession {
   token: string;
@@ -12,6 +13,7 @@ export interface UserSession {
   lastName: string;
   roles: string[];
   permissions: string[];
+  theme?: string;
 }
 
 @Injectable({
@@ -20,6 +22,7 @@ export interface UserSession {
 export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
+  private readonly themeService = inject(ThemeService);
   private readonly apiUrl = '/api/auth';
 
   // Signals-based Session Store
@@ -80,9 +83,21 @@ export class AuthService {
     );
   }
 
+  updateSessionTheme(theme: string): void {
+    const s = this.session();
+    if (s) {
+      s.theme = theme;
+      this.session.set({ ...s });
+      localStorage.setItem('ess_session', JSON.stringify(s));
+    }
+  }
+
   private saveSession(session: UserSession): void {
     this.session.set(session);
     localStorage.setItem('ess_session', JSON.stringify(session));
+    if (session.theme) {
+      this.themeService.setTheme(session.theme);
+    }
   }
 
   private loadSessionFromStorage(): void {
@@ -91,6 +106,9 @@ export class AuthService {
       if (data) {
         const decoded = JSON.parse(data) as UserSession;
         this.session.set(decoded);
+        if (decoded.theme) {
+          this.themeService.setTheme(decoded.theme);
+        }
       }
     } catch (e) {
       console.error('Failed to parse active user session', e);

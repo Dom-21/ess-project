@@ -98,19 +98,18 @@
         <table class="w-full text-left border-collapse">
           <thead>
             <tr class="border-b border-slate-100 dark:border-slate-800 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
-              <th class="pb-2 pl-2">Employee info</th>
-              <th class="pb-2">Department</th>
-              <th class="pb-2">Designation</th>
-              <th class="pb-2">Contact</th>
-              <th class="pb-2">Base Salary (INR)</th>
-              <th class="pb-2">Status</th>
-              <th class="pb-2 pr-2 text-right">Actions</th>
+              <th class="pb-2 pl-2 whitespace-nowrap">Employee info</th>
+              <th class="pb-2 whitespace-nowrap">Department</th>
+              <th class="pb-2 whitespace-nowrap">Designation</th>
+              <th class="pb-2 whitespace-nowrap">Contact</th>
+              <th class="pb-2 whitespace-nowrap">Status</th>
+              <th class="pb-2 pr-2 text-right whitespace-nowrap">Actions</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100/60 dark:divide-slate-800/60">
             @for (emp of employees(); track emp.id || emp.employeeId) {
               <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/30 text-xs font-semibold text-slate-700 dark:text-slate-300">
-                <td class="py-2.5 pl-2">
+                <td class="py-2.5 pl-2 whitespace-nowrap">
                   <div class="flex items-center gap-2.5">
                     <div class="w-7 h-7 rounded-md bg-primary-100 dark:bg-primary-950/20 text-primary-500 font-black flex items-center justify-center text-xs uppercase border border-primary-500/10">
                       {{ emp.firstName?.charAt(0) }}
@@ -125,22 +124,19 @@
                     </div>
                   </div>
                 </td>
-                <td class="py-2.5 font-bold">
-                  {{ emp.department?.name || 'N/A' }}
+                <td class="py-2.5 font-bold whitespace-nowrap">
+                  {{ emp.departmentName || 'N/A' }}
                 </td>
-                <td class="py-2.5 font-bold text-slate-500 dark:text-slate-400">
-                  {{ emp.designation?.title || 'N/A' }}
+                <td class="py-2.5 font-bold text-slate-500 dark:text-slate-400 whitespace-nowrap">
+                  {{ emp.designationName || 'N/A' }}
                 </td>
-                <td class="py-2.5 font-medium text-slate-400">
+                <td class="py-2.5 font-medium text-slate-400 whitespace-nowrap">
                   {{ emp.phoneNumber || 'N/A' }}
                 </td>
-                <td class="py-2.5 font-black text-slate-850 dark:text-slate-200">
-                  ₹{{ emp.baseSalary | number:'1.2-2' }}
-                </td>
-                <td class="py-2.5">
+                <td class="py-2.5 whitespace-nowrap">
                   <app-status-badge status="ACTIVE"></app-status-badge>
                 </td>
-                <td class="py-2.5 pr-2 text-right">
+                <td class="py-2.5 pr-2 text-right whitespace-nowrap">
                   <button 
                     (click)="openAssignDrawer(emp)"
                     class="px-2 py-1 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-[10px] font-extrabold text-primary-500 rounded border border-slate-200 dark:border-slate-850 cursor-pointer transition-all active:scale-95"
@@ -172,22 +168,22 @@
         <table class="w-full text-left border-collapse">
           <thead>
             <tr class="border-b border-slate-100 dark:border-slate-800 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
-              <th class="pb-2 pl-2">User Email</th>
-              <th class="pb-2">Security clearances</th>
-              <th class="pb-2">Assign Security Role</th>
-              <th class="pb-2 pr-2 text-right">Security Actions</th>
+              <th class="pb-2 pl-2 whitespace-nowrap">User Email</th>
+              <th class="pb-2 whitespace-nowrap">Security clearances</th>
+              <th class="pb-2 whitespace-nowrap">Assign Security Role</th>
+              <th class="pb-2 pr-2 text-right whitespace-nowrap">Security Actions</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100/60 dark:divide-slate-800/60">
             @for (user of users(); track user.id || user.email) {
               <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/30 text-xs font-semibold text-slate-700 dark:text-slate-300">
-                <td class="py-3 pl-2">
+                <td class="py-3 pl-2 whitespace-nowrap">
                   <span class="font-bold text-slate-850 dark:text-slate-200 block">
                     {{ user.email }}
                   </span>
                   <span class="text-[9px] font-bold text-slate-400 block">ID: #{{ user.id }}</span>
                 </td>
-                <td class="py-3">
+                <td class="py-3 whitespace-nowrap">
                   <div class="flex flex-wrap gap-1">
                     @for (role of user.roles; track role.id) {
                       <span class="inline-flex items-center gap-1 px-1.5 py-0.5 text-[9px] font-extrabold rounded bg-primary-500/10 text-primary-500 border border-primary-500/15 uppercase">
@@ -206,10 +202,10 @@
                     }
                   </div>
                 </td>
-                <td class="py-3">
+                <td class="py-3 whitespace-nowrap">
                   <select 
                     #roleSelect
-                    class="px-2 py-1 rounded-md bg-slate-50/50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 outline-none text-xs font-semibold"
+                    class="px-2 py-1 rounded-md bg-slate-50/50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 outline-none text-xs font-semibold"
                   >
                     <option value="" disabled selected>Select Role</option>
                     @for (roleName of availableRoles; track roleName) {
@@ -219,7 +215,7 @@
                     }
                   </select>
                 </td>
-                <td class="py-3 pr-2 text-right">
+                <td class="py-3 pr-2 text-right whitespace-nowrap">
                   <button 
                     (click)="addRole(user.id, roleSelect.value); roleSelect.value = ''"
                     [disabled]="!roleSelect.value"
@@ -252,23 +248,23 @@
           <table class="w-full text-left border-collapse">
             <thead>
               <tr class="border-b border-slate-100 dark:border-slate-800 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
-                <th class="pb-2 pl-2">ID</th>
-                <th class="pb-2">Code</th>
-                <th class="pb-2">Department Name</th>
-                <th class="pb-2 pr-2 text-right">Created By</th>
+                <th class="pb-2 pl-2 whitespace-nowrap">ID</th>
+                <th class="pb-2 whitespace-nowrap">Code</th>
+                <th class="pb-2 whitespace-nowrap">Department Name</th>
+                <th class="pb-2 pr-2 text-right whitespace-nowrap">Created By</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100/60 dark:divide-slate-800/60">
               @for (dept of departments(); track dept.id) {
                 <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/30 text-xs font-semibold text-slate-700 dark:text-slate-300">
-                  <td class="py-2.5 pl-2 font-black text-slate-400">#{{ dept.id }}</td>
-                  <td class="py-2.5 font-bold">
-                    <span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-slate-100 dark:bg-slate-950 text-slate-700 dark:text-slate-300 border border-slate-200/50 dark:border-slate-800 uppercase">
+                  <td class="py-2.5 pl-2 font-black text-slate-400 whitespace-nowrap">#{{ dept.id }}</td>
+                  <td class="py-2.5 font-bold whitespace-nowrap">
+                    <span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-slate-100 dark:bg-slate-955 text-slate-700 dark:text-slate-300 border border-slate-200/50 dark:border-slate-800 uppercase">
                       {{ dept.code }}
                     </span>
                   </td>
-                  <td class="py-2.5 font-bold text-slate-850 dark:text-slate-200">{{ dept.name }}</td>
-                  <td class="py-2.5 pr-2 text-right font-medium text-slate-400 uppercase text-[9px]">{{ dept.createdBy || 'SYSTEM' }}</td>
+                  <td class="py-2.5 font-bold text-slate-850 dark:text-slate-200 whitespace-nowrap">{{ dept.name }}</td>
+                  <td class="py-2.5 pr-2 text-right font-medium text-slate-400 uppercase text-[9px] whitespace-nowrap">{{ dept.createdBy || 'SYSTEM' }}</td>
                 </tr>
               }
             </tbody>
@@ -410,27 +406,27 @@
           <table class="w-full text-left border-collapse">
             <thead>
               <tr class="border-b border-slate-100 dark:border-slate-800 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
-                <th class="pb-2 pl-2">ID</th>
-                <th class="pb-2">Code</th>
-                <th class="pb-2">Leave Type Name</th>
-                <th class="pb-2">Annual Limit</th>
-                <th class="pb-2">Carry Forward Limit</th>
-                <th class="pb-2 pr-2 text-right">Actions</th>
+                <th class="pb-2 pl-2 whitespace-nowrap">ID</th>
+                <th class="pb-2 whitespace-nowrap">Code</th>
+                <th class="pb-2 whitespace-nowrap">Leave Type Name</th>
+                <th class="pb-2 whitespace-nowrap">Annual Limit</th>
+                <th class="pb-2 whitespace-nowrap">Carry Forward Limit</th>
+                <th class="pb-2 pr-2 text-right whitespace-nowrap">Actions</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100/60 dark:divide-slate-800/60">
               @for (lt of leaveTypes(); track lt.id) {
                 <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/30 text-xs font-semibold text-slate-700 dark:text-slate-300">
-                  <td class="py-2.5 pl-2 font-black text-slate-400">#{{ lt.id }}</td>
-                  <td class="py-2.5 font-bold">
+                  <td class="py-2.5 pl-2 font-black text-slate-400 whitespace-nowrap">#{{ lt.id }}</td>
+                  <td class="py-2.5 font-bold whitespace-nowrap">
                     <span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-slate-100 dark:bg-slate-950 text-slate-700 dark:text-slate-300 border border-slate-200/50 dark:border-slate-800 uppercase animate-pulse">
                       {{ lt.code }}
                     </span>
                   </td>
-                  <td class="py-2.5 font-bold text-slate-850 dark:text-slate-200">{{ lt.name }}</td>
-                  <td class="py-2.5 font-bold text-slate-850 dark:text-slate-200">{{ lt.annualLimit }} Days</td>
-                  <td class="py-2.5 font-medium text-slate-400">{{ lt.carryForwardLimit || 0 }} Days</td>
-                  <td class="py-2.5 pr-2 text-right">
+                  <td class="py-2.5 font-bold text-slate-850 dark:text-slate-200 whitespace-nowrap">{{ lt.name }}</td>
+                  <td class="py-2.5 font-bold text-slate-850 dark:text-slate-200 whitespace-nowrap">{{ lt.annualLimit }} Days</td>
+                  <td class="py-2.5 font-medium text-slate-400 whitespace-nowrap">{{ lt.carryForwardLimit || 0 }} Days</td>
+                  <td class="py-2.5 pr-2 text-right whitespace-nowrap">
                     <button 
                       (click)="startEditLeaveType(lt)"
                       class="px-2 py-1 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-[10px] font-extrabold text-primary-500 rounded border border-slate-200 dark:border-slate-850 cursor-pointer transition-all active:scale-95"

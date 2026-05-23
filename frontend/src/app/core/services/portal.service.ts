@@ -213,4 +213,11 @@ export class PortalService {
   allocateLeaveBalance(data: any): Observable<any> {
     return this.http.post<any>('/api/leaves/balances/allocate', data);
   }
+
+  // ==========================================
+  // 13. THEME PERSISTENCE API
+  // ==========================================
+  updateTheme(theme: string): Observable<any> {
+    return this.http.put<any>(`/api/auth/theme?theme=${theme}`, {});
+  }
 }

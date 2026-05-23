@@ -26,6 +26,10 @@ export class ThemeService {
     this.isDarkMode.update(curr => !curr);
   }
 
+  setTheme(theme: string): void {
+    this.isDarkMode.set(theme === 'dark');
+  }
+
   private loadTheme(): void {
     const saved = localStorage.getItem('theme');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;

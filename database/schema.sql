@@ -122,6 +122,7 @@ CREATE TABLE users (
     token_expiry TIMESTAMP NULL,
     is_active TINYINT(1) DEFAULT 1,
     is_deleted TINYINT(1) DEFAULT 0,
+    theme VARCHAR(20) DEFAULT 'light',
     version INT DEFAULT 0,
     created_by VARCHAR(100) DEFAULT 'SYSTEM',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

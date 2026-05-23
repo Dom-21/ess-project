@@ -1,6 +1,8 @@
 @import "tailwindcss";
 @import "primeicons/primeicons.css";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --font-sans: "Nunito", system-ui, -apple-system, sans-serif;
   --font-display: "Nunito", system-ui, -apple-system, sans-serif;

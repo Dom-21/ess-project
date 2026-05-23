@@ -99,7 +99,8 @@ public class AuthController {
                     employee.getFirstName(),
                     employee.getLastName(),
                     roles,
-                    permissions
+                    permissions,
+                    user.getTheme()
             ));
 
         } catch (Exception ex) {
@@ -142,7 +143,19 @@ public class AuthController {
                 employee.getFirstName(),
                 employee.getLastName(),
                 roles,
-                permissions
+                permissions,
+                user.getTheme()
         ));
+    }
+    @PutMapping("/theme")
+    public ResponseEntity<Void> updateTheme(java.security.Principal principal, @RequestParam String theme) {
+        if (principal == null) {
+            throw new UnauthorizedException("User not authenticated");
+        }
+        User user = userRepository.findByEmail(principal.getName())
+                .orElseThrow(() -> new BadRequestException("User not found"));
+        user.setTheme(theme);
+        userRepository.save(user);
+        return ResponseEntity.ok().build();
     }
 }

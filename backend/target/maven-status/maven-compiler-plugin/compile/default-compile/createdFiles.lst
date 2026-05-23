@@ -15,6 +15,7 @@ com\ess\portal\entity\ExpenseItem.class
 com\ess\portal\entity\SalaryStructure.class
 com\ess\portal\dto\AssetRequestResponse.class
 com\ess\portal\dto\LeaveRequestDto.class
+com\ess\portal\repository\LeaveTypeRepository.class
 com\ess\portal\dto\LoginRequest.class
 com\ess\portal\entity\Role.class
 com\ess\portal\entity\TravelRequest.class
@@ -133,6 +134,7 @@ com\ess\portal\controller\EmployeeController.class
 com\ess\portal\config\CorsConfig$1.class
 com\ess\portal\dto\ExpenseItemResponse$ExpenseItemResponseBuilder.class
 com\ess\portal\dto\NotificationDto$NotificationDtoBuilder.class
+com\ess\portal\dto\LeaveAllocationDto.class
 com\ess\portal\repository\WorkflowActionLogRepository.class
 com\ess\portal\dto\AttendanceRecordDto.class
 com\ess\portal\service\NotificationServiceImpl.class
@@ -141,6 +143,7 @@ com\ess\portal\dto\ExpenseClaimDto.class
 com\ess\portal\entity\WorkflowStepConfig.class
 com\ess\portal\exception\GlobalExceptionHandler.class
 com\ess\portal\controller\DepartmentController.class
+com\ess\portal\dto\LeaveAllocationDto$LeaveAllocationDtoBuilder.class
 com\ess\portal\dto\TravelRequestDto$TravelRequestDtoBuilder.class
 com\ess\portal\repository\WorkflowStepConfigRepository.class
 com\ess\portal\dto\PagedResponse$PagedResponseBuilder.class

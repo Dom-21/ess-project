@@ -13,13 +13,13 @@
           {{ profile().firstName }} {{ profile().lastName }}
         </h2>
         <p class="text-primary-500 font-bold text-xs tracking-wide mt-0.5 uppercase">
-          {{ profile().designation?.title }}
+          {{ profile().designationName || 'N/A' }}
         </p>
         
         <div class="flex flex-wrap justify-center md:justify-start gap-3 mt-2 text-[10px] font-bold text-slate-400 dark:text-slate-500">
           <span class="flex items-center gap-1">
             <i class="pi pi-building text-primary-500 text-[8px]"></i>
-            <span>{{ profile().department?.name }}</span>
+            <span>{{ profile().departmentName || 'N/A' }}</span>
           </span>
           <span class="h-3 w-px bg-slate-200 dark:bg-slate-800 hidden sm:inline"></span>
           <span class="flex items-center gap-1">
@@ -45,17 +45,17 @@
             <span class="absolute top-2.5 right-2.5 text-[8px] font-black text-primary-500 uppercase bg-primary-500/10 px-1.5 py-0.5 rounded">Manager</span>
             <p class="text-[9px] font-bold text-slate-400">Reporting To</p>
             
-            @if (profile().reportingManager) {
+            @if (profile().reportingManagerName) {
               <div class="flex items-center gap-2 mt-2">
                 <div class="w-6 h-6 rounded bg-accent-100 dark:bg-accent-950/20 text-accent-500 flex items-center justify-center font-bold text-xs uppercase">
-                  {{ profile().reportingManager?.firstName?.charAt(0) }}
+                  {{ profile().reportingManagerName.charAt(0) }}
                 </div>
                 <div>
-                  <p class="text-xs font-bold text-slate-800 dark:text-slate-100 leading-none">
-                    {{ profile().reportingManager?.firstName }} {{ profile().reportingManager?.lastName }}
+                  <p class="text-xs font-bold text-slate-850 dark:text-slate-100 leading-none">
+                    {{ profile().reportingManagerName }}
                   </p>
                   <p class="text-[9px] font-bold text-slate-400 mt-1 uppercase">
-                    {{ profile().reportingManager?.designation?.title || 'Manager' }}
+                    Manager
                   </p>
                 </div>
               </div>
@@ -87,7 +87,7 @@
           <div class="space-y-0.5">
             <span class="text-[9px] font-bold text-slate-450 uppercase tracking-wider block">Email Address</span>
             <span class="text-xs font-bold text-slate-800 dark:text-slate-200 break-all">
-              {{ profile().user?.email }}
+              {{ profile().email }}
             </span>
           </div>
 
