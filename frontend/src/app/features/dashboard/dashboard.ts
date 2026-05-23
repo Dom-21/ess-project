@@ -33,7 +33,11 @@ export class DashboardComponent implements OnInit {
     pendingLeaves: 0,
     pendingExpenses: 0,
     pendingTravel: 0,
-    pendingAssets: 0
+    pendingAssets: 0,
+    unassignedManagerCount: 0,
+    unassignedDeptCount: 0,
+    recentRequests: [],
+    departmentDist: {}
   });
 
   teamMembers = signal<any[]>([]);
@@ -95,8 +99,28 @@ export class DashboardComponent implements OnInit {
       value: this.adminSummary().pendingAssets,
       icon: 'pi pi-desktop text-success-500',
       bg: 'bg-success-50 dark:bg-success-950/20'
+    },
+    {
+      title: 'No Manager',
+      value: this.adminSummary().unassignedManagerCount || 0,
+      icon: 'pi pi-user-minus text-red-500',
+      bg: 'bg-red-50 dark:bg-red-950/20'
+    },
+    {
+      title: 'No Dept',
+      value: this.adminSummary().unassignedDeptCount || 0,
+      icon: 'pi pi-exclamation-triangle text-amber-500',
+      bg: 'bg-amber-50 dark:bg-amber-950/20'
     }
   ]);
+
+  departmentList = computed(() => {
+    const dist = this.adminSummary().departmentDist || {};
+    return Object.keys(dist).map(key => ({
+      name: key,
+      count: dist[key]
+    })).sort((a, b) => b.count - a.count);
+  });
 
   ngOnInit(): void {
     this.updateClock();
