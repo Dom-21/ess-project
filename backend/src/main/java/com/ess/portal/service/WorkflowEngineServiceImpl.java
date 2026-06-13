@@ -4,6 +4,8 @@ import com.ess.portal.entity.*;
 import com.ess.portal.exception.BadRequestException;
 import com.ess.portal.exception.ResourceNotFoundException;
 import com.ess.portal.repository.*;
+import com.ess.portal.dto.NotificationEvent;
+import com.ess.portal.kafka.NotificationProducer;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +58,9 @@ public class WorkflowEngineServiceImpl implements WorkflowEngineService {
 
     @Autowired
     private NotificationRepository notificationRepository;
+
+    @Autowired(required = false)
+    private NotificationProducer notificationProducer;
 
     @Override
     @Transactional
@@ -453,12 +458,22 @@ public class WorkflowEngineServiceImpl implements WorkflowEngineService {
     }
 
     private void sendNotification(String email, String title, String msg) {
-        Notification notification = new Notification();
-        notification.setRecipientEmail(email);
-        notification.setTitle(title);
-        notification.setMessage(msg);
-        notification.setType("IN_APP");
-        notification.setIsRead(false);
-        notificationRepository.save(notification);
+        NotificationEvent event = NotificationEvent.builder()
+                .recipientEmail(email)
+                .title(title)
+                .message(msg)
+                .type("IN_APP")
+                .build();
+        if (notificationProducer != null) {
+            notificationProducer.sendNotificationEvent(event);
+        } else {
+            Notification notification = new Notification();
+            notification.setRecipientEmail(email);
+            notification.setTitle(title);
+            notification.setMessage(msg);
+            notification.setType("IN_APP");
+            notification.setIsRead(false);
+            notificationRepository.save(notification);
+        }
     }
 }

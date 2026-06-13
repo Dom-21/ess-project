@@ -1,4 +1,5 @@
 C:\Users\danda\OneDrive\Documents\AntiGravity\ess-project\backend\src\main\java\com\ess\portal\config\CorsConfig.java
+C:\Users\danda\OneDrive\Documents\AntiGravity\ess-project\backend\src\main\java\com\ess\portal\config\KafkaConfig.java
 C:\Users\danda\OneDrive\Documents\AntiGravity\ess-project\backend\src\main\java\com\ess\portal\config\RequestLoggingFilter.java
 C:\Users\danda\OneDrive\Documents\AntiGravity\ess-project\backend\src\main\java\com\ess\portal\config\SecurityConfig.java
 C:\Users\danda\OneDrive\Documents\AntiGravity\ess-project\backend\src\main\java\com\ess\portal\constants\AuditActionType.java
@@ -39,6 +40,7 @@ C:\Users\danda\OneDrive\Documents\AntiGravity\ess-project\backend\src\main\java\
 C:\Users\danda\OneDrive\Documents\AntiGravity\ess-project\backend\src\main\java\com\ess\portal\dto\LeaveRequestResponse.java
 C:\Users\danda\OneDrive\Documents\AntiGravity\ess-project\backend\src\main\java\com\ess\portal\dto\LoginRequest.java
 C:\Users\danda\OneDrive\Documents\AntiGravity\ess-project\backend\src\main\java\com\ess\portal\dto\NotificationDto.java
+C:\Users\danda\OneDrive\Documents\AntiGravity\ess-project\backend\src\main\java\com\ess\portal\dto\NotificationEvent.java
 C:\Users\danda\OneDrive\Documents\AntiGravity\ess-project\backend\src\main\java\com\ess\portal\dto\PagedResponse.java
 C:\Users\danda\OneDrive\Documents\AntiGravity\ess-project\backend\src\main\java\com\ess\portal\dto\PayslipDto.java
 C:\Users\danda\OneDrive\Documents\AntiGravity\ess-project\backend\src\main\java\com\ess\portal\dto\RefreshTokenRequest.java
@@ -82,6 +84,8 @@ C:\Users\danda\OneDrive\Documents\AntiGravity\ess-project\backend\src\main\java\
 C:\Users\danda\OneDrive\Documents\AntiGravity\ess-project\backend\src\main\java\com\ess\portal\exception\GlobalExceptionHandler.java
 C:\Users\danda\OneDrive\Documents\AntiGravity\ess-project\backend\src\main\java\com\ess\portal\exception\ResourceNotFoundException.java
 C:\Users\danda\OneDrive\Documents\AntiGravity\ess-project\backend\src\main\java\com\ess\portal\exception\UnauthorizedException.java
+C:\Users\danda\OneDrive\Documents\AntiGravity\ess-project\backend\src\main\java\com\ess\portal\kafka\NotificationConsumer.java
+C:\Users\danda\OneDrive\Documents\AntiGravity\ess-project\backend\src\main\java\com\ess\portal\kafka\NotificationProducer.java
 C:\Users\danda\OneDrive\Documents\AntiGravity\ess-project\backend\src\main\java\com\ess\portal\PortalApplication.java
 C:\Users\danda\OneDrive\Documents\AntiGravity\ess-project\backend\src\main\java\com\ess\portal\repository\AssetRepository.java
 C:\Users\danda\OneDrive\Documents\AntiGravity\ess-project\backend\src\main\java\com\ess\portal\repository\AssetRequestRepository.java

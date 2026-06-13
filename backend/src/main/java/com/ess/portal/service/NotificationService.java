@@ -15,4 +15,6 @@ public interface NotificationService {
 
     void sendNotification(Integer employeeId, String title, String message, String type, String referenceType,
             Integer referenceId);
+
+    void processNotificationEvent(NotificationEvent event);
 }

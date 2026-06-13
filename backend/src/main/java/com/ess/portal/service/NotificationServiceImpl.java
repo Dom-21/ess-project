@@ -1,15 +1,18 @@
 package com.ess.portal.service;
 
 import com.ess.portal.dto.NotificationDto;
+import com.ess.portal.dto.NotificationEvent;
 import com.ess.portal.entity.Employee;
 import com.ess.portal.entity.Notification;
 import com.ess.portal.exception.ResourceNotFoundException;
+import com.ess.portal.kafka.NotificationProducer;
 import com.ess.portal.repository.EmployeeRepository;
 import com.ess.portal.repository.NotificationRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -18,10 +21,14 @@ public class NotificationServiceImpl implements NotificationService {
 
     private final NotificationRepository notificationRepository;
     private final EmployeeRepository employeeRepository;
+    private final Optional<NotificationProducer> notificationProducer;
 
-    public NotificationServiceImpl(NotificationRepository notificationRepository, EmployeeRepository employeeRepository) {
+    public NotificationServiceImpl(NotificationRepository notificationRepository, 
+                                   EmployeeRepository employeeRepository,
+                                   Optional<NotificationProducer> notificationProducer) {
         this.notificationRepository = notificationRepository;
         this.employeeRepository = employeeRepository;
+        this.notificationProducer = notificationProducer;
     }
 
     @Override
@@ -64,18 +71,42 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public void sendNotification(Integer employeeId, String title, String message, String type, String referenceType, Integer referenceId) {
-        Employee employee = employeeRepository.findById(employeeId)
-                .orElseThrow(() -> new ResourceNotFoundException("Employee not found with id " + employeeId));
+        NotificationEvent event = NotificationEvent.builder()
+                .employeeId(employeeId)
+                .title(title)
+                .message(message)
+                .type(type)
+                .referenceType(referenceType)
+                .referenceId(referenceId)
+                .build();
+        if (notificationProducer.isPresent()) {
+            notificationProducer.get().sendNotificationEvent(event);
+        } else {
+            processNotificationEvent(event);
+        }
+    }
+
+    @Override
+    public void processNotificationEvent(NotificationEvent event) {
+        String email = event.getRecipientEmail();
         
-        if (employee.getUser() == null || employee.getUser().getEmail() == null) {
+        if (email == null && event.getEmployeeId() != null) {
+            Employee employee = employeeRepository.findById(event.getEmployeeId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Employee not found with id " + event.getEmployeeId()));
+            if (employee.getUser() != null && employee.getUser().getEmail() != null) {
+                email = employee.getUser().getEmail();
+            }
+        }
+
+        if (email == null) {
             return;
         }
 
         Notification notification = new Notification();
-        notification.setRecipientEmail(employee.getUser().getEmail());
-        notification.setTitle(title);
-        notification.setMessage(message);
-        notification.setType(type != null ? type : "IN_APP");
+        notification.setRecipientEmail(email);
+        notification.setTitle(event.getTitle());
+        notification.setMessage(event.getMessage());
+        notification.setType(event.getType() != null ? event.getType() : "IN_APP");
         notification.setIsRead(false);
         notification.setCreatedBy("SYSTEM");
         notification.setUpdatedBy("SYSTEM");
@@ -83,10 +114,10 @@ public class NotificationServiceImpl implements NotificationService {
         notificationRepository.save(notification);
 
         // Simple simulation of email or push notifications if requested
-        if ("EMAIL".equalsIgnoreCase(type) || "BOTH".equalsIgnoreCase(type)) {
-            System.out.println("SIMULATING EMAIL SENT TO: " + employee.getUser().getEmail());
-            System.out.println("SUBJECT: " + title);
-            System.out.println("BODY: " + message);
+        if ("EMAIL".equalsIgnoreCase(event.getType()) || "BOTH".equalsIgnoreCase(event.getType())) {
+            System.out.println("SIMULATING EMAIL SENT TO: " + email);
+            System.out.println("SUBJECT: " + event.getTitle());
+            System.out.println("BODY: " + event.getMessage());
         }
     }
 

@@ -6,13 +6,13 @@ server:
 spring:
   application:
     name: ess-portal-backend
-  
+
   datasource:
     url: jdbc:mysql://localhost:3306/ess_portal?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
     username: root
     password: user@123
     driver-class-name: com.mysql.cj.jdbc.Driver
-  
+
   jpa:
     hibernate:
       ddl-auto: update
@@ -21,17 +21,32 @@ spring:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.MySQLDialect
-  
+
   sql:
     init:
       mode: always
       schema-locations: file:../database/schema.sql
       data-locations: file:../database/seed_data.sql
-  
+
   servlet:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        max.block.ms: 3000
+    consumer:
+      group-id: ess-notification-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "com.ess.portal.dto"
 
 # Custom Security and JWT Configurations
 app:
@@ -42,3 +57,6 @@ app:
       refresh-expiration-ms: 604800000 # 7 Days
   file-upload:
     dir: uploads
+  kafka:
+    enabled: false # Set to true to route notifications through Kafka (requires running broker)
+

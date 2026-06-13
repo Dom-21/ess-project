@@ -1,6 +1,7 @@
 com\ess\portal\service\AttendanceService.class
 com\ess\portal\dto\AttendanceRecordDto$AttendanceRecordDtoBuilder.class
 com\ess\portal\repository\WorkflowConfigRepository.class
+com\ess\portal\dto\NotificationEvent$NotificationEventBuilder.class
 com\ess\portal\controller\ExpenseController.class
 com\ess\portal\repository\AssetRepository.class
 com\ess\portal\entity\Permission.class
@@ -63,6 +64,7 @@ com\ess\portal\dto\AssetRequestDto.class
 com\ess\portal\service\NotificationService.class
 com\ess\portal\entity\Employee.class
 com\ess\portal\service\PayrollServiceImpl.class
+com\ess\portal\config\KafkaConfig.class
 com\ess\portal\dto\ExpenseClaimResponse$ExpenseClaimResponseBuilder.class
 com\ess\portal\entity\Holiday.class
 com\ess\portal\dto\TravelRequestDto.class
@@ -118,6 +120,7 @@ com\ess\portal\dto\LeaveRequestDto$LeaveRequestDtoBuilder.class
 com\ess\portal\entity\Payslip.class
 com\ess\portal\config\SecurityConfig.class
 com\ess\portal\entity\LeaveBalance.class
+com\ess\portal\kafka\NotificationConsumer.class
 com\ess\portal\dto\ExpenseItemDto$ExpenseItemDtoBuilder.class
 com\ess\portal\service\LeaveService.class
 com\ess\portal\service\WorkflowEngineServiceImpl.class
@@ -138,6 +141,7 @@ com\ess\portal\dto\LeaveAllocationDto.class
 com\ess\portal\repository\WorkflowActionLogRepository.class
 com\ess\portal\dto\AttendanceRecordDto.class
 com\ess\portal\service\NotificationServiceImpl.class
+com\ess\portal\dto\NotificationEvent.class
 com\ess\portal\repository\ReimbursementRepository.class
 com\ess\portal\dto\ExpenseClaimDto.class
 com\ess\portal\entity\WorkflowStepConfig.class
@@ -152,5 +156,6 @@ com\ess\portal\entity\Notification.class
 com\ess\portal\repository\NotificationRepository.class
 com\ess\portal\repository\WorkflowInstanceRepository.class
 com\ess\portal\entity\WorkflowConfig.class
+com\ess\portal\kafka\NotificationProducer.class
 com\ess\portal\controller\AssetController.class
 com\ess\portal\service\PayrollService.class

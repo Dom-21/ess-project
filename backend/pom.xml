@@ -93,6 +93,12 @@
             <scope>runtime</scope>
             <optional>true</optional>
         </dependency>
+
+        <!-- Spring Kafka for asynchronous notifications -->
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
+        </dependency>
         
         <!-- Spring Boot Test -->
         <dependency>
